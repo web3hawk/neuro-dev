@@ -1,0 +1,253 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-layout-header {
+  background: #001529;
+  line-height: 64px;
+  padding: 0;
+}
+
+.ant-layout-footer {
+  background: #f0f2f5;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.ant-menu-dark {
+  background: #001529;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #1890ff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Loading animations */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Card hover effects */
+.ant-card {
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar customization */
+.ant-progress-text {
+  color: #1890ff !important;
+}
+
+/* Table customization */
+.ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* Button group spacing */
+.ant-btn + .ant-btn {
+  margin-left: 8px;
+}
+
+/* Timeline customization */
+.ant-timeline-item-head {
+  border-color: #1890ff;
+}
+
+.ant-timeline-item-tail {
+  border-left-color: #d9d9d9;
+}
+
+/* Form customization */
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+/* Tag styles */
+.ant-tag {
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+/* Alert styles */
+.ant-alert {
+  border-radius: 6px;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed !important;
+    height: 100vh;
+    z-index: 100;
+  }
+  
+  .ant-layout-sider-collapsed {
+    transform: translateX(-200px);
+  }
+  
+  .ant-layout-header {
+    padding-left: 16px !important;
+  }
+  
+  .ant-table {
+    font-size: 12px;
+  }
+  
+  .ant-card-head-title {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-layout-content {
+    margin: 16px 8px !important;
+    padding: 16px !important;
+  }
+  
+  .ant-card {
+    margin-bottom: 16px;
+  }
+  
+  .ant-btn {
+    font-size: 12px;
+    height: 28px;
+    padding: 0 8px;
+  }
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+  background-color: #141414;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='dark'] .ant-layout {
+  background: #141414;
+}
+
+[data-theme='dark'] .ant-layout-content {
+  background: #141414;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.4s ease-out;
+}
+
+/* Custom utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.p-16 {
+  padding: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Status indicators */
+.status-created {
+  color: #faad14;
+}
+
+.status-running {
+  color: #1890ff;
+}
+
+.status-completed {
+  color: #52c41a;
+}
+
+.status-failed {
+  color: #ff4d4f;
+}
