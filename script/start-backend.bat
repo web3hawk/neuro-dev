@@ -1,6 +1,6 @@
 @echo off
 echo Starting ChatDev Go Backend...
-cd /d "%~dp0\..\backend"
+cd /d "%~dp0\..\neuro-dev\backend"
 
 echo Installing Go dependencies...
 go mod tidy

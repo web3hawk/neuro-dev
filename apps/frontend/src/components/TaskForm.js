@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import {
   Form,
   Input,
@@ -14,6 +14,7 @@ import {
   SaveOutlined,
   CloseOutlined
 } from '@ant-design/icons';
+const { useState, useEffect } = React;
 
 const { TextArea } = Input;
 const { Option } = Select;

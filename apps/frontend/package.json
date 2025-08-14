@@ -18,6 +18,9 @@
     "prismjs": "^1.28.0",
     "react-syntax-highlighter": "^15.5.0"
   },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

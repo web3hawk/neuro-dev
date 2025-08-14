@@ -1,4 +1,4 @@
-module chatdev-backend
+module neuro-dev
 
 go 1.23.3
 

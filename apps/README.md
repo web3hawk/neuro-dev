@@ -53,7 +53,7 @@ A front-end/back-end separated implementation of ChatDev using Go backend and Re
 ### Backend
 ```bash
 cd backend
-go mod init chatdev-backend
+go mod init neuro-dev
 go mod tidy
 go run main.go
 ```

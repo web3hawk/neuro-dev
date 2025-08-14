@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import {
   Card,
   Table,
@@ -17,7 +17,6 @@ import {
 } from 'antd';
 import {
   PlayCircleOutlined,
-  EyeOutlined,
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
@@ -28,6 +27,7 @@ import {
 import moment from 'moment';
 import axios from 'axios';
 import TaskForm from './TaskForm';
+const { useState, useEffect } = React;
 
 const { Title, Text } = Typography;
 

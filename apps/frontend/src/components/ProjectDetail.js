@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -35,6 +35,7 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import moment from 'moment';
 import axios from 'axios';
 import TaskList from './TaskList';
+const { useState, useEffect, useRef } = React;
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;

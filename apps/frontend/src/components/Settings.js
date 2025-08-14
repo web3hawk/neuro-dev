@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import {
   Card,
   Form,
@@ -28,6 +28,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
+const { useState, useEffect } = React;
 
 const { Title, Paragraph } = Typography;
 const { Option } = Select;

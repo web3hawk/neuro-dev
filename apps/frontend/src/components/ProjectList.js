@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -26,6 +26,7 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import axios from 'axios';
+const { useState, useEffect } = React;
 
 const { Title } = Typography;
 const { Search } = Input;

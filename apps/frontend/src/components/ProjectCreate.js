@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -21,6 +21,7 @@ import {
   BulbOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
+const { useState, useEffect } = React;
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;

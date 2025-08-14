@@ -1,0 +1,16 @@
+{
+  "name": "neuro-dev",
+  "version": "1.0.0",
+  "description": "ai战队",
+  "workspaces": [
+    "./apps/frontend"
+  ],
+  "scripts": {
+    "neuro-install": "npm install --workspaces",
+    "neuro-start": "npm run start --workspace ./apps/frontend",
+    "neuro-build": "npm run build --workspace ./apps/frontend",
+    "neuro-clean:all": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json & npm install --workspaces"
+  },
+  "author": "kevin",
+  "license": "MIT"
+}

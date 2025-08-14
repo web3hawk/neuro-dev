@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import {
   Card,
   Table,
@@ -27,6 +27,7 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import axios from 'axios';
+const { useState, useEffect } = React;
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
