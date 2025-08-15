@@ -6,7 +6,7 @@
     "./apps/frontend"
   ],
   "scripts": {
-    "neuro-install": "npm install --workspace ./apps/frontend --ignore-scripts",
+    "neuro-install": "npm install --workspace ./apps/frontend",
     "neuro-start": "npm run start --workspace ./apps/frontend",
     "neuro-build": "npm run build --workspace ./apps/frontend",
     "neuro-clean": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json",
