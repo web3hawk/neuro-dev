@@ -6,9 +6,10 @@
     "./apps/frontend"
   ],
   "scripts": {
-    "neuro-install": "npm install --workspaces",
+    "neuro-install": "npm install --workspace ./apps/frontend --ignore-scripts",
     "neuro-start": "npm run start --workspace ./apps/frontend",
     "neuro-build": "npm run build --workspace ./apps/frontend",
+    "neuro-clean": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json",
     "neuro-clean:all": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json & npm install --workspaces"
   },
   "author": "kevin",
