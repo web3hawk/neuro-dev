@@ -25,7 +25,7 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
-import axios from 'axios';
+import api from '../utils/apiClient';
 import TaskForm from './TaskForm';
 const { useState, useEffect } = React;
 
@@ -56,7 +56,7 @@ function TaskList({ projectId, onTaskUpdate }) {
   const loadTasks = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/projects/${projectId}/tasks`);
+      const response = await api.get(`/api/projects/${projectId}/tasks`);
       if (response.data.success) {
         setTasks(response.data.data);
       }
@@ -94,7 +94,7 @@ function TaskList({ projectId, onTaskUpdate }) {
 
   const handleStartTask = async (taskId) => {
     try {
-      const response = await axios.post(`/api/tasks/${taskId}/start`);
+      const response = await api.post(`/api/tasks/${taskId}/start`);
       if (response.data.success) {
         message.success('任务启动成功！');
         loadTasks();
@@ -107,7 +107,7 @@ function TaskList({ projectId, onTaskUpdate }) {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await axios.delete(`/api/tasks/${taskId}`);
+      const response = await api.delete(`/api/tasks/${taskId}`);
       if (response.data.success) {
         message.success('任务删除成功！');
         loadTasks();
@@ -123,10 +123,10 @@ function TaskList({ projectId, onTaskUpdate }) {
       let response;
       if (editingTask) {
         // Update existing task
-        response = await axios.put(`/api/tasks/${editingTask.id}`, taskData);
+        response = await api.put(`/api/tasks/${editingTask.id}`, taskData);
       } else {
         // Create new task
-        response = await axios.post(`/api/projects/${projectId}/tasks`, taskData);
+        response = await api.post(`/api/projects/${projectId}/tasks`, taskData);
       }
       
       if (response.data.success) {

@@ -8,10 +8,10 @@ import {
   GithubOutlined,
   UnorderedListOutlined 
 } from '@ant-design/icons';
-import ProjectList from './components/ProjectList';
-import ProjectDetail from './components/ProjectDetail';
-import Settings from './components/Settings';
-import TaskExecutionList from './components/TaskExecutionList';
+import ProjectList from './components/ProjectList.tsx';
+import ProjectDetail from './components/ProjectDetail.tsx';
+import Settings from './components/Settings.tsx';
+import TaskExecutionList from './components/TaskExecutionList.tsx';
 import './App.css';
 
 const { useState, useEffect } = React;
