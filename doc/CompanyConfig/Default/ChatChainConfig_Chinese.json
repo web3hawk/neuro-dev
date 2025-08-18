@@ -1,0 +1,99 @@
+{
+    "chain": [{
+            "phase": "需求分析",
+            "phaseType": "SimplePhase",
+            "max_turn_step": -1,
+            "need_reflect": "True"
+        },
+        {
+            "phase": "语言选择",
+            "phaseType": "SimplePhase",
+            "max_turn_step": -1,
+            "need_reflect": "True"
+        },
+        {
+            "phase": "编码",
+            "phaseType": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": "False"
+        },
+        {
+            "phase": "代码完善全部",
+            "phaseType": "ComposedPhase",
+            "cycleNum": 10,
+            "Composition": [{
+                "phase": "代码完善",
+                "phaseType": "SimplePhase",
+                "max_turn_step": 1,
+                "need_reflect": "False"
+            }]
+        },
+        {
+            "phase": "代码审查",
+            "phaseType": "ComposedPhase",
+            "cycleNum": 3,
+            "Composition": [{
+                    "phase": "代码审查评论",
+                    "phaseType": "SimplePhase",
+                    "max_turn_step": 1,
+                    "need_reflect": "False"
+                },
+                {
+                    "phase": "代码审查修改",
+                    "phaseType": "SimplePhase",
+                    "max_turn_step": 1,
+                    "need_reflect": "False"
+                }
+            ]
+        },
+        {
+            "phase": "测试",
+            "phaseType": "ComposedPhase",
+            "cycleNum": 3,
+            "Composition": [{
+                    "phase": "测试错误总结",
+                    "phaseType": "SimplePhase",
+                    "max_turn_step": 1,
+                    "need_reflect": "False"
+                },
+                {
+                    "phase": "测试修改",
+                    "phaseType": "SimplePhase",
+                    "max_turn_step": 1,
+                    "need_reflect": "False"
+                }
+            ]
+        },
+        {
+            "phase": "环境文档",
+            "phaseType": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": "True"
+        },
+        {
+            "phase": "手册",
+            "phaseType": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": "False"
+        }
+    ],
+    "recruitments": [
+        "首席执行官",
+        "顾问",
+        "首席人力资源官",
+        "首席产品官",
+        "首席技术官",
+        "程序员",
+        "代码审查员",
+        "软件测试工程师",
+        "首席创意官"
+    ],
+    "clear_structure": "True",
+    "gui_design": "True",
+    "git_management": "False",
+    "web_spider": "False",
+    "self_improve": "False",
+    "incremental_develop": "False",
+    "with_memory": "False",
+    "background_prompt": "ChatDev是一个由多个智能代理支持的软件公司，如首席执行官、首席人力资源官、首席产品官、首席技术官等，具有多代理组织结构，其使命是'通过编程改变数字世界'。"
+}

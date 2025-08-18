@@ -38,7 +38,7 @@ function App() {
     {
       key: 'history',
       icon: <HistoryOutlined />,
-      label: '历史',
+      label: '计费',
       path: '/history'
     },
     {
@@ -72,7 +72,7 @@ function App() {
               <GithubOutlined style={{ color: '#1890ff', fontSize: '24px' }} />
               {!collapsed && (
                 <Title level={4} style={{ color: 'white', margin: 0 }}>
-                  ChatDev
+                  NeuroPool
                 </Title>
               )}
             </Space>
@@ -101,7 +101,7 @@ function App() {
               height: '100%'
             }}>
               <Title level={3} style={{ color: 'white', margin: 0 }}>
-                AI驱动的软件开发平台
+                AI驱动的任务平台
               </Title>
               <Space>
               </Space>
@@ -120,7 +120,7 @@ function App() {
           </Content>
 
           <Footer style={{ textAlign: 'center' }}>
-            ChatDev Go-React ©2024 - AI驱动的软件开发平台
+            NeuroPool Go-React ©2025 - AI驱动的任务平台
           </Footer>
         </Layout>
       </Layout>
