@@ -13,8 +13,9 @@ import (
 func (s *Server) createTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectID := vars["projectId"]
-	project, ok := s.Svc.Projects[projectID]
-	if !ok {
+	// Ensure project exists in DB
+	var tmp int64
+	if err := s.Svc.DB.Model(&models.Project{}).Where("id = ?", projectID).Count(&tmp).Error; err != nil || tmp == 0 {
 		s.sendError(w, "Project not found", http.StatusNotFound)
 		return
 	}
@@ -43,34 +44,32 @@ func (s *Server) createTask(w http.ResponseWriter, r *http.Request) {
 		Progress:     0,
 		Results:      models.TaskResults{},
 	}
-	project.Tasks = append(project.Tasks, task)
+	if err := s.Svc.DB.Create(&task).Error; err != nil {
+		s.sendError(w, "Failed to create task", http.StatusInternalServerError)
+		return
+	}
+	// optional in-memory
 	s.Svc.Tasks[taskID] = &task
-	project.UpdatedAt = time.Now()
+	_ = s.Svc.DB.Model(&models.Project{}).Where("id = ?", projectID).Update("updated_at", time.Now()).Error
 	s.sendResponse(w, task)
 }
 
 func (s *Server) getProjectTasks(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectID := vars["projectId"]
-	project, ok := s.Svc.Projects[projectID]
-	if !ok {
-		s.sendError(w, "Project not found", http.StatusNotFound)
+	var tasks []models.Task
+	if err := s.Svc.DB.Where("project_id = ?", projectID).Find(&tasks).Error; err != nil {
+		s.sendError(w, "Failed to load tasks", http.StatusInternalServerError)
 		return
 	}
-	// Sync tasks with latest data from service map if available (ensures progress/status updates)
-	for i := range project.Tasks {
-		if t, ok := s.Svc.Tasks[project.Tasks[i].ID]; ok && t != nil {
-			project.Tasks[i] = *t
-		}
-	}
-	s.sendResponse(w, project.Tasks)
+	s.sendResponse(w, tasks)
 }
 
 func (s *Server) getTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	task, ok := s.Svc.Tasks[taskID]
-	if !ok {
+	var task models.Task
+	if err := s.Svc.DB.First(&task, "id = ?", taskID).Error; err != nil {
 		s.sendError(w, "Task not found", http.StatusNotFound)
 		return
 	}
@@ -80,8 +79,8 @@ func (s *Server) getTask(w http.ResponseWriter, r *http.Request) {
 func (s *Server) updateTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	task, ok := s.Svc.Tasks[taskID]
-	if !ok {
+	var task models.Task
+	if err := s.Svc.DB.First(&task, "id = ?", taskID).Error; err != nil {
 		s.sendError(w, "Task not found", http.StatusNotFound)
 		return
 	}
@@ -106,42 +105,35 @@ func (s *Server) updateTask(w http.ResponseWriter, r *http.Request) {
 		task.Requirements = req.Requirements
 	}
 	task.UpdatedAt = time.Now()
-	project := s.Svc.Projects[task.ProjectID]
-	for i := range project.Tasks {
-		if project.Tasks[i].ID == taskID {
-			project.Tasks[i] = *task
-			break
-		}
+	if err := s.Svc.DB.Save(&task).Error; err != nil {
+		s.sendError(w, "Failed to update task", http.StatusInternalServerError)
+		return
 	}
-	project.UpdatedAt = time.Now()
 	s.sendResponse(w, task)
 }
 
 func (s *Server) deleteTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	task, ok := s.Svc.Tasks[taskID]
-	if !ok {
+	var task models.Task
+	if err := s.Svc.DB.First(&task, "id = ?", taskID).Error; err != nil {
 		s.sendError(w, "Task not found", http.StatusNotFound)
 		return
 	}
-	project := s.Svc.Projects[task.ProjectID]
-	for i, t := range project.Tasks {
-		if t.ID == taskID {
-			project.Tasks = append(project.Tasks[:i], project.Tasks[i+1:]...)
-			break
-		}
+	if err := s.Svc.DB.Delete(&models.Task{}, "id = ?", taskID).Error; err != nil {
+		s.sendError(w, "Failed to delete task", http.StatusInternalServerError)
+		return
 	}
-	project.UpdatedAt = time.Now()
 	delete(s.Svc.Tasks, taskID)
+	_ = s.Svc.DB.Model(&models.Project{}).Where("id = ?", task.ProjectID).Update("updated_at", time.Now()).Error
 	s.sendResponse(w, map[string]string{"message": "Task deleted successfully"})
 }
 
 func (s *Server) startTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	task, ok := s.Svc.Tasks[taskID]
-	if !ok {
+	var task models.Task
+	if err := s.Svc.DB.First(&task, "id = ?", taskID).Error; err != nil {
 		s.sendError(w, "Task not found", http.StatusNotFound)
 		return
 	}
@@ -149,16 +141,23 @@ func (s *Server) startTask(w http.ResponseWriter, r *http.Request) {
 		s.sendError(w, "Task is not in pending status", http.StatusBadRequest)
 		return
 	}
-	project := s.Svc.Projects[task.ProjectID]
-	go s.Svc.ExecuteTask(task, project)
+	var project models.Project
+	if err := s.Svc.DB.First(&project, "id = ?", task.ProjectID).Error; err != nil {
+		s.sendError(w, "Project not found", http.StatusNotFound)
+		return
+	}
+	// optional in-memory
+	s.Svc.Tasks[taskID] = &task
+	s.Svc.Projects[project.ID] = &project
+	go s.Svc.ExecuteTask(&task, &project)
 	s.sendResponse(w, map[string]string{"message": "Task started successfully"})
 }
 
 func (s *Server) getTaskStatus(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID := vars["id"]
-	task, ok := s.Svc.Tasks[taskID]
-	if !ok {
+	var task models.Task
+	if err := s.Svc.DB.First(&task, "id = ?", taskID).Error; err != nil {
 		s.sendError(w, "Task not found", http.StatusNotFound)
 		return
 	}

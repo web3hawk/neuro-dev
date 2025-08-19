@@ -55,7 +55,7 @@ function ProjectCreate() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Card>
+      <Card bordered={false}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <RocketOutlined style={{ fontSize: 48, color: '#1890ff', marginBottom: 16 }} />
           <Title level={2}>创建新的软件项目</Title>
@@ -66,7 +66,7 @@ function ProjectCreate() {
 
         <Row gutter={[32, 32]}>
           <Col xs={24} lg={24}>
-            <Card size="small">
+            <Card size="small" bordered={false}>
               <Form
                 form={form}
                 layout="vertical"

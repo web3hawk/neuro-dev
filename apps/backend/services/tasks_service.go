@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"neuro-dev/models"
 )
 
@@ -39,7 +40,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 	if strings.Contains(strings.ToLower(prompt), "游戏") || strings.Contains(strings.ToLower(prompt), "game") {
 		return []models.Task{
 			{
-				ID:           fmt.Sprintf("task_%d", time.Now().Unix()),
+				ID:           uuid.NewString(),
 				Name:         "游戏核心逻辑开发",
 				Description:  "实现游戏的主要逻辑和规则系统",
 				Type:         "feature",
@@ -50,7 +51,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 				UpdatedAt:    time.Now(),
 			},
 			{
-				ID:           fmt.Sprintf("task_%d", time.Now().Unix()+1),
+				ID:           uuid.NewString(),
 				Name:         "用户界面设计",
 				Description:  "设计和实现游戏的用户界面",
 				Type:         "feature",
@@ -61,7 +62,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 				UpdatedAt:    time.Now(),
 			},
 			{
-				ID:           fmt.Sprintf("task_%d", time.Now().Unix()+2),
+				ID:           uuid.NewString(),
 				Name:         "测试与优化",
 				Description:  "游戏功能测试和性能优化",
 				Type:         "enhancement",
@@ -76,7 +77,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 
 	return []models.Task{
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()),
+			ID:           uuid.NewString(),
 			Name:         "后端API开发",
 			Description:  "开发RESTful API接口和数据库设计",
 			Type:         "feature",
@@ -87,7 +88,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 			UpdatedAt:    time.Now(),
 		},
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()+1),
+			ID:           uuid.NewString(),
 			Name:         "前端界面开发",
 			Description:  "开发用户界面和交互功能",
 			Type:         "feature",
@@ -98,7 +99,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 			UpdatedAt:    time.Now(),
 		},
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()+2),
+			ID:           uuid.NewString(),
 			Name:         "系统集成测试",
 			Description:  "前后端集成和系统测试",
 			Type:         "enhancement",
@@ -114,7 +115,7 @@ func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
 func (s *Service) generateDefaultTasks(description string) []models.Task {
 	return []models.Task{
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()),
+			ID:           uuid.NewString(),
 			Name:         "项目初始化",
 			Description:  "设置项目结构和基础配置",
 			Type:         "feature",
@@ -125,7 +126,7 @@ func (s *Service) generateDefaultTasks(description string) []models.Task {
 			UpdatedAt:    time.Now(),
 		},
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()+1),
+			ID:           uuid.NewString(),
 			Name:         "核心功能开发",
 			Description:  "实现项目的主要功能模块",
 			Type:         "feature",
@@ -136,7 +137,7 @@ func (s *Service) generateDefaultTasks(description string) []models.Task {
 			UpdatedAt:    time.Now(),
 		},
 		{
-			ID:           fmt.Sprintf("task_%d", time.Now().Unix()+2),
+			ID:           uuid.NewString(),
 			Name:         "测试和部署",
 			Description:  "功能测试、性能优化和部署准备",
 			Type:         "enhancement",
@@ -150,8 +151,7 @@ func (s *Service) generateDefaultTasks(description string) []models.Task {
 }
 
 func (s *Service) NextTaskID() string {
-	s.taskCounter++
-	return fmt.Sprintf("task_%d", s.taskCounter)
+	return uuid.NewString()
 }
 
 func (s *Service) ExecuteTask(task *models.Task, project *models.Project) {

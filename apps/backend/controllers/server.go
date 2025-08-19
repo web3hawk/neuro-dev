@@ -108,8 +108,8 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	for {
-		project, ok := s.Svc.Projects[projectID]
-		if !ok {
+		var project models.Project
+		if err := s.Svc.DB.Preload("Tasks").First(&project, "id = ?", projectID).Error; err != nil {
 			break
 		}
 		if err := conn.WriteJSON(project); err != nil {

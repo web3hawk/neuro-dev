@@ -1,17 +1,17 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"neuro-dev/models"
 )
 
 // Project-related service methods
 func (s *Service) NextProjectID() string {
-	s.projectCounter++
-	return fmt.Sprintf("project_%d", s.projectCounter)
+	// Use UUID to avoid collisions across restarts and concurrent requests
+	return uuid.NewString()
 }
 
 func (s *Service) ExecuteProject(project *models.Project) {
