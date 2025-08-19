@@ -9,13 +9,14 @@ import {
   Typography,
   Row,
   Col,
-  message
+  message,
+  Select
 } from 'antd';
 import {
   RocketOutlined
 } from '@ant-design/icons';
 import api from '../utils/apiClient';
-const { useState } = React;
+const { useState, useEffect } = React;
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -23,19 +24,40 @@ const { TextArea } = Input;
 interface CreateProjectValues {
   name: string;
   description: string;
+  vendors: string[];
+  model: string;
 }
 
 function ProjectCreate() {
   const [form] = Form.useForm<CreateProjectValues>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [models, setModels] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadModels();
+  }, []);
+
+  const loadModels = async () => {
+    try {
+      const response = await api.get('/api/models');
+      if ((response as any).data?.success) {
+        setModels((response as any).data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      message.error('加载模型失败');
+    }
+  };
 
   const onFinish = async (values: CreateProjectValues) => {
     setLoading(true);
     try {
       const response = await api.post('/api/projects', {
         name: values.name,
-        description: values.description
+        description: values.description,
+        vendors: values.vendors ? values.vendors.join(',') : '',
+        model: values.model
       });
 
       if ((response as any).data?.success) {
@@ -99,6 +121,46 @@ function ProjectCreate() {
                     rows={4}
                     size="large"
                   />
+                </Form.Item>
+
+                <Form.Item
+                  label="参考厂商"
+                  name="vendors"
+                  rules={[
+                    { required: false, message: '请选择参考厂商' }
+                  ]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="请选择参考厂商"
+                    size="large"
+                    options={[
+                      { label: '阿里云', value: '阿里云' },
+                      { label: '谷歌云', value: '谷歌云' },
+                      { label: '华为云', value: '华为云' },
+                      { label: '亚马逊云', value: '亚马逊云' }
+                    ]}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="选择模型"
+                  name="model"
+                  rules={[
+                    { required: true, message: '请选择AI模型！' }
+                  ]}
+                >
+                  <Select
+                    placeholder="请选择AI模型"
+                    size="large"
+                    loading={models.length === 0}
+                  >
+                    {models.map((model: any) => (
+                      <Select.Option key={model.id} value={model.name}>
+                        {model.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
 
                 <Form.Item>

@@ -20,7 +20,8 @@ import {
   ReloadOutlined,
   UserOutlined,
   PlusOutlined,
-  EditOutlined
+  EditOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import api from '../utils/apiClient';
 const { useState, useEffect } = React;
@@ -43,14 +44,17 @@ interface SettingsValues {
 function Settings() {
   const [form] = Form.useForm<SettingsValues>();
   const [loading, setLoading] = useState(false);
-  const [models, setModels] = useState<string[]>([]);
+  const [models, setModels] = useState<any[]>([]);
   const [customModels, setCustomModels] = useState<string[]>([]);
   const [newModel, setNewModel] = useState<string>("");
+  const [newModelBaseUrl, setNewModelBaseUrl] = useState<string>("");
   const [companies, setCompanies] = useState<string[]>([]);
   const [roles, setRoles] = useState<Record<string, any>>({});
   const [modelTokens, setModelTokens] = useState<Record<string, string>>({});
   const [editingRole, setEditingRole] = useState<any>(null);
   const [roleModalVisible, setRoleModalVisible] = useState(false);
+  const [editingModel, setEditingModel] = useState<any>(null);
+  const [modelModalVisible, setModelModalVisible] = useState(false);
   const [settings, setSettings] = useState<SettingsValues>({
     defaultModel: 'GPT_3_5_TURBO',
     defaultOrganization: 'DefaultOrganization',
@@ -63,6 +67,12 @@ function Settings() {
   });
 
   useEffect(() => {
+    // Clean up unwanted localStorage keys
+    const keysToRemove = ['test1', 'test2', 'test', 'zzz', 'xxx', 'aaa'];
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
     loadConfiguration();
     loadSettings();
     loadRoles();
@@ -75,18 +85,33 @@ function Settings() {
         api.get('/api/config/companies')
       ]);
 
-      let serverModels: string[] = [];
+      let serverModels: any[] = [];
       if ((modelsRes as any).data?.success) {
         serverModels = (modelsRes as any).data.data || [];
       }
 
-      // Load custom models from localStorage and merge (unique)
+      // Load custom models from localStorage and merge (unique by name)
       const localCustom = JSON.parse(localStorage.getItem('chatdev-models') || '[]');
       if (Array.isArray(localCustom)) {
         setCustomModels(localCustom);
+        // Convert old string format to new object format for compatibility
+        const localCustomObjects = localCustom.map((name: string) => ({
+          id: null,
+          name: name,
+          base_url: '',
+          is_custom: true
+        }));
+        // Merge and remove duplicates by name
+        const merged = [...serverModels];
+        localCustomObjects.forEach((localModel: any) => {
+          if (!merged.find((m: any) => m.name === localModel.name)) {
+            merged.push(localModel);
+          }
+        });
+        setModels(merged);
+      } else {
+        setModels(serverModels);
       }
-      const merged = Array.from(new Set([...(serverModels || []), ...(localCustom || [])]));
-      setModels(merged);
 
       // Load model tokens from localStorage
       const storedTokens = JSON.parse(localStorage.getItem('chatdev-modelTokens') || '{}');
@@ -190,23 +215,97 @@ function Settings() {
     }
   };
 
-  const handleAddModel = () => {
+  const handleAddModel = async () => {
     const name = (newModel || '').trim();
+    const baseUrl = (newModelBaseUrl || '').trim();
+    
     if (!name) {
       message.warning('请输入模型名称');
       return;
     }
-    if (models.includes(name)) {
+    
+    if (models.find((m: any) => m.name === name)) {
       message.info('该模型已存在');
       return;
     }
-    const updatedCustom = Array.from(new Set([...(customModels || []), name]));
-    setCustomModels(updatedCustom);
-    const merged = Array.from(new Set([...(models || []), name]));
-    setModels(merged);
-    localStorage.setItem('chatdev-models', JSON.stringify(updatedCustom));
-    setNewModel('');
-    message.success('已添加模型');
+
+    try {
+      const response = await api.post('/api/models', {
+        name: name,
+        base_url: baseUrl
+      });
+
+      if ((response as any).data?.success) {
+        const newModelObj = (response as any).data.data;
+        setModels([...models, newModelObj]);
+        
+        // Also update localStorage for backward compatibility
+        const updatedCustom = Array.from(new Set([...(customModels || []), name]));
+        setCustomModels(updatedCustom);
+        localStorage.setItem('chatdev-models', JSON.stringify(updatedCustom));
+        
+        setNewModel('');
+        setNewModelBaseUrl('');
+        message.success('已添加模型');
+      } else {
+        message.error('添加模型失败');
+      }
+    } catch (error) {
+      console.error('Failed to add model:', error);
+      message.error('添加模型失败');
+    }
+  };
+
+  const handleEditModel = (model: any) => {
+    setEditingModel(model);
+    setModelModalVisible(true);
+  };
+
+  const handleDeleteModel = async (model: any) => {
+    if (!model.id) {
+      message.warning('无法删除此模型');
+      return;
+    }
+
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除模型 "${model.name}" 吗？`,
+      onOk: async () => {
+        try {
+          const response = await api.delete(`/api/models/${model.id}`);
+          if ((response as any).data?.success) {
+            setModels(models.filter((m: any) => m.id !== model.id));
+            message.success('模型删除成功');
+          } else {
+            message.error('删除模型失败');
+          }
+        } catch (error) {
+          console.error('Failed to delete model:', error);
+          message.error('删除模型失败');
+        }
+      }
+    });
+  };
+
+  const handleUpdateModel = async (modelData: any) => {
+    try {
+      const response = await api.put(`/api/models/${editingModel.id}`, {
+        name: modelData.name,
+        base_url: modelData.base_url
+      });
+
+      if ((response as any).data?.success) {
+        const updatedModel = (response as any).data.data;
+        setModels(models.map((m: any) => m.id === editingModel.id ? updatedModel : m));
+        setModelModalVisible(false);
+        message.success('模型更新成功');
+      } else {
+        message.error('更新模型失败');
+      }
+    } catch (error) {
+      console.error('Failed to update model:', error);
+      message.error('更新模型失败');
+    }
   };
 
 
@@ -297,15 +396,23 @@ function Settings() {
         <Card title="模型设置" style={{ marginBottom: 24 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
             <Row gutter={8}>
-              <Col flex="auto">
+              <Col span={8}>
                 <Input
-                  placeholder="添加自定义模型名称，例如：GPT_4_1"
+                  placeholder="模型名称，例如：GPT_4_1"
                   value={newModel}
                   onChange={(e) => setNewModel(e.target.value)}
                   onPressEnter={() => handleAddModel()}
                 />
               </Col>
-              <Col>
+              <Col span={12}>
+                <Input
+                  placeholder="Base URL，例如：https://api.openai.com/v1"
+                  value={newModelBaseUrl}
+                  onChange={(e) => setNewModelBaseUrl(e.target.value)}
+                  onPressEnter={() => handleAddModel()}
+                />
+              </Col>
+              <Col span={4}>
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAddModel()}>
                   添加模型
                 </Button>
@@ -317,13 +424,28 @@ function Settings() {
               <Title level={5}>可用模型（包含系统与自定义）</Title>
               <Table
                 size="small"
-                dataSource={(models || []).map((m) => ({ key: m, name: m }))}
+                dataSource={(models || []).map((m) => ({ 
+                  key: typeof m === 'string' ? m : m.name, 
+                  name: typeof m === 'string' ? m : m.name,
+                  base_url: typeof m === 'string' ? '' : (m.base_url || ''),
+                  is_custom: typeof m === 'string' ? true : (m.is_custom || false),
+                  id: typeof m === 'string' ? null : m.id,
+                  originalModel: m
+                }))}
                 columns={[
-                  { title: '模型名称', dataIndex: 'name', key: 'name' },
+                  { title: '模型名称', dataIndex: 'name', key: 'name', width: 200 },
+                  { 
+                    title: 'Base URL', 
+                    dataIndex: 'base_url', 
+                    key: 'base_url', 
+                    width: 250,
+                    render: (text: string) => text || '默认'
+                  },
                   {
                     title: 'Token',
                     dataIndex: 'token',
                     key: 'token',
+                    width: 200,
                     render: (_: any, record: any) => (
                       <Input.Password
                         placeholder="输入该模型的API Token"
@@ -334,6 +456,32 @@ function Settings() {
                           localStorage.setItem('chatdev-modelTokens', JSON.stringify(next));
                         }}
                       />
+                    )
+                  },
+                  {
+                    title: '操作',
+                    key: 'actions',
+                    width: 120,
+                    render: (_: any, record: any) => (
+                      <Space>
+                        {record.id && (
+                          <>
+                            <Button
+                              type="text"
+                              icon={<EditOutlined />}
+                              onClick={() => handleEditModel(record.originalModel)}
+                              title="编辑模型"
+                            />
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => handleDeleteModel(record.originalModel)}
+                              title="删除模型"
+                            />
+                          </>
+                        )}
+                      </Space>
                     )
                   }
                 ]}
@@ -370,6 +518,13 @@ function Settings() {
         models={models}
         onSave={handleSaveRole}
         onCancel={() => setRoleModalVisible(false)}
+      />
+      
+      <ModelModal
+        visible={modelModalVisible}
+        editingModel={editingModel}
+        onSave={handleUpdateModel}
+        onCancel={() => setModelModalVisible(false)}
       />
     </div>
   );
@@ -445,9 +600,12 @@ const RoleModal = ({ visible, editingRole, models, onSave, onCancel }: any) => {
           rules={[{ required: true, message: '请选择使用的AI模型' }]}
         >
           <Select placeholder="选择AI模型">
-            {models && models.map((model: string) => (
-              <Option key={model} value={model}>{model}</Option>
-            ))}
+            {models && models.map((model: any) => {
+              const modelName = typeof model === 'string' ? model : model.name;
+              return (
+                <Option key={modelName} value={modelName}>{modelName}</Option>
+              );
+            })}
           </Select>
         </Form.Item>
 
@@ -493,6 +651,67 @@ const RoleModal = ({ visible, editingRole, models, onSave, onCancel }: any) => {
             rows={3} 
             placeholder="描述完成任务时的具体要求和期望"
           />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+// Model Modal Component
+const ModelModal = ({ visible, editingModel, onSave, onCancel }: any) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (visible && editingModel) {
+      form.setFieldsValue({
+        name: editingModel.name,
+        base_url: editingModel.base_url || ''
+      });
+    } else if (visible) {
+      form.resetFields();
+    }
+  }, [visible, editingModel, form]);
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      onSave({
+        name: values.name,
+        base_url: values.base_url || ''
+      });
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
+  };
+
+  return (
+    <Modal
+      title="编辑模型"
+      open={visible}
+      onOk={handleSubmit}
+      onCancel={onCancel}
+      okText="保存"
+      cancelText="取消"
+      width={600}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+      >
+        <Form.Item
+          name="name"
+          label="模型名称"
+          rules={[{ required: true, message: '请输入模型名称' }]}
+        >
+          <Input placeholder="例如：GPT_4_1" />
+        </Form.Item>
+
+        <Form.Item
+          name="base_url"
+          label="Base URL"
+          rules={[{ required: false }]}
+        >
+          <Input placeholder="例如：https://api.openai.com/v1" />
         </Form.Item>
       </Form>
     </Modal>

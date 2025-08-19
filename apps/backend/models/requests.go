@@ -6,6 +6,7 @@ type CreateProjectRequest struct {
 	Organization string `json:"organization"`
 	Model        string `json:"model"`
 	Config       string `json:"config"`
+	Vendors      string `json:"vendors"`
 }
 
 type CreateTaskRequest struct {

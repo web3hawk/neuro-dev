@@ -11,6 +11,7 @@ type Project struct {
 	Organization string    `json:"organization"`
 	Model        string    `json:"model"`
 	Status       string    `json:"status"`
+	Vendors      string    `json:"vendors"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Progress     int       `json:"progress"`

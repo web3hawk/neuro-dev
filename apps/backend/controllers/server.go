@@ -32,7 +32,7 @@ func NewServer() *Server {
 		panic(err)
 	}
 	// Auto-migrate models
-	if err := dbConn.AutoMigrate(&models.Project{}, &models.Task{}); err != nil {
+	if err := dbConn.AutoMigrate(&models.Project{}, &models.Task{}, &models.Model{}); err != nil {
 		panic(err)
 	}
 
@@ -74,6 +74,9 @@ func (s *Server) setupRoutes() {
 	api.HandleFunc("/config/phases", s.getPhases).Methods("GET")
 	api.HandleFunc("/config/roles", s.getRoles).Methods("GET")
 	api.HandleFunc("/models", s.getModels).Methods("GET")
+	api.HandleFunc("/models", s.createModel).Methods("POST")
+	api.HandleFunc("/models/{id}", s.updateModel).Methods("PUT")
+	api.HandleFunc("/models/{id}", s.deleteModel).Methods("DELETE")
 
 	// WebSocket
 	s.Router.HandleFunc("/ws/projects/{id}", s.handleWebSocket)

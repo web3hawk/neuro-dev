@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,82 +33,6 @@ func (s *Service) GenerateTasksFromDescription(description string, model string)
 		return s.generateDefaultTasks(description)
 	}
 	return tasks
-}
-
-func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
-	if strings.Contains(strings.ToLower(prompt), "游戏") || strings.Contains(strings.ToLower(prompt), "game") {
-		return []models.Task{
-			{
-				ID:           uuid.NewString(),
-				Name:         "游戏核心逻辑开发",
-				Description:  "实现游戏的主要逻辑和规则系统",
-				Type:         "feature",
-				Status:       "pending",
-				Priority:     1,
-				Requirements: "游戏引擎集成、逻辑算法实现、状态管理",
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
-			},
-			{
-				ID:           uuid.NewString(),
-				Name:         "用户界面设计",
-				Description:  "设计和实现游戏的用户界面",
-				Type:         "feature",
-				Status:       "pending",
-				Priority:     2,
-				Requirements: "响应式设计、用户体验优化、视觉效果",
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
-			},
-			{
-				ID:           uuid.NewString(),
-				Name:         "测试与优化",
-				Description:  "游戏功能测试和性能优化",
-				Type:         "enhancement",
-				Status:       "pending",
-				Priority:     3,
-				Requirements: "单元测试、集成测试、性能调优",
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
-			},
-		}
-	}
-
-	return []models.Task{
-		{
-			ID:           uuid.NewString(),
-			Name:         "后端API开发",
-			Description:  "开发RESTful API接口和数据库设计",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     1,
-			Requirements: "数据库设计、API接口、身份验证",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-		{
-			ID:           uuid.NewString(),
-			Name:         "前端界面开发",
-			Description:  "开发用户界面和交互功能",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     2,
-			Requirements: "响应式设计、现代CSS框架、用户体验",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-		{
-			ID:           uuid.NewString(),
-			Name:         "系统集成测试",
-			Description:  "前后端集成和系统测试",
-			Type:         "enhancement",
-			Status:       "pending",
-			Priority:     3,
-			Requirements: "API测试、端到端测试、错误处理",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-	}
 }
 
 func (s *Service) generateDefaultTasks(description string) []models.Task {

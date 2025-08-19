@@ -2,9 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.co
 	"net/http"
+"
+	"n
 	"os"
 	"path/filepath"
+	"github.com/gorilla/mux"
 )
 
 // Config-related handlers
@@ -50,5 +54,112 @@ func (s *Server) getRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getModels(w http.ResponseWriter, r *http.Request) {
-	s.sendResponse(w, []string{"GPT_3_5_TURBO", "GPT_4", "GPT_4_TURBO", "GPT_4O", "GPT_4O_MINI"})
+	// Get models from database
+	var modelList []models.Model
+	if err := s.Svc.DB.Find(&modelList).Error; err != nil {
+		s.sendError(w, "Failed to fetch models from database", http.StatusInternalServerError)
+		return
+
+	
+	// If no models in database, initialize with default models
+	if len(modelList) == 0 {
+		defaultModels := []string{"GPT_3_5_TURBO", "GPT_4", "GPT_4_TURBO", "GPT_4O", "GPT_4O_MINI"}
+		for _, modelName := range defaultModels {
+			model := models.Model{
+				Name:     modelName,
+				BaseURL:  "",
+				IsCustom: false,
+			}
+			s.Svc.DB.Create(&model)
+			modelList = append(modelList, model)
+		}
+
+	
+	s.sendResponse(w, modelList)
+}
+
+func (s *Server) createModel(w http.ResponseWriter, r *http.Request) {
+	var req models.CreateModelRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	// Check if model already exists
+	var existing models.Model
+	if err := s.Svc.DB.Where("name = ?", req.Name).First(&existing).Error; err == nil {
+		s.sendError(w, "Model with this name already exists", http.StatusConflict)
+		return
+	}
+
+	model := models.Model{
+		Name:     req.Name,
+		BaseURL:  req.BaseURL,
+		IsCustom: true,
+	}
+
+	if err := s.Svc.DB.Create(&model).Error; err != nil {
+		s.sendError(w, "Failed to create model", http.StatusInternalServerError)
+		return
+	}
+
+	s.sendResponse(w, model)
+}
+
+func (s *Server) updateModel(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		s.sendError(w, "Invalid model ID", http.StatusBadRequest)
+		return
+	}
+
+	var req models.UpdateModelRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	var model models.Model
+	if err := s.Svc.DB.First(&model, id).Error; err != nil {
+		s.sendError(w, "Model not found", http.StatusNotFound)
+		return
+	}
+
+	// Update fields if provided
+	if req.Name != "" {
+		model.Name = req.Name
+	}
+	if req.BaseURL != "" {
+		model.BaseURL = req.BaseURL
+	}
+
+	if err := s.Svc.DB.Save(&model).Error; err != nil {
+		s.sendError(w, "Failed to update model", http.StatusInternalServerError)
+		return
+	}
+
+	s.sendResponse(w, model)
+}
+
+func (s *Server) deleteModel(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		s.sendError(w, "Invalid model ID", http.StatusBadRequest)
+		return
+	}
+
+	var model models.Model
+	if err := s.Svc.DB.First(&model, id).Error; err != nil {
+		s.sendError(w, "Model not found", http.StatusNotFound)
+		return
+	}
+
+	if err := s.Svc.DB.Delete(&model).Error; err != nil {
+		s.sendError(w, "Failed to delete model", http.StatusInternalServerError)
+		return
+	}
+
+	s.sendResponse(w, map[string]string{"message": "Model deleted successfully"})
 }
