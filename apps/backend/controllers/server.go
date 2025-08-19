@@ -8,6 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"neuro-dev/config"
+	"neuro-dev/db"
 	"neuro-dev/models"
 	"neuro-dev/services"
 )
@@ -19,12 +21,27 @@ type Server struct {
 }
 
 func NewServer() *Server {
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		panic(err)
+	}
+	// Initialize DB (Postgres via GORM)
+	dbConn, err := db.Init(cfg)
+	if err != nil {
+		panic(err)
+	}
+	// Auto-migrate models
+	if err := dbConn.AutoMigrate(&models.Project{}, &models.Task{}); err != nil {
+		panic(err)
+	}
+
 	s := &Server{
 		Router: mux.NewRouter(),
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
-		Svc: services.NewService(),
+		Svc: services.NewService(dbConn),
 	}
 	s.setupRoutes()
 	return s
@@ -34,6 +51,7 @@ func (s *Server) setupRoutes() {
 	api := s.Router.PathPrefix("/api").Subrouter()
 
 	// Project endpoints
+	api.HandleFunc("/projects", s.listProjects).Methods("GET")
 	api.HandleFunc("/projects", s.createProject).Methods("POST")
 	api.HandleFunc("/projects/{id}", s.getProject).Methods("GET")
 	api.HandleFunc("/projects/{id}/status", s.getProjectStatus).Methods("GET")

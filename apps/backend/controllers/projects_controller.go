@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -11,6 +12,31 @@ import (
 )
 
 // Project-related handlers
+func (s *Server) listProjects(w http.ResponseWriter, r *http.Request) {
+	// Convert map to slice
+	projects := make([]*models.Project, 0, len(s.Svc.Projects))
+	for _, p := range s.Svc.Projects {
+		projects = append(projects, p)
+	}
+	// Sort by updated_at desc for stable ordering
+	sort.Slice(projects, func(i, j int) bool { return projects[i].UpdatedAt.After(projects[j].UpdatedAt) })
+	// Optionally compute progress based on tasks completion
+	for _, p := range projects {
+		total := len(p.Tasks)
+		if total == 0 {
+			continue
+		}
+		completed := 0
+		for _, t := range p.Tasks {
+			if t.Status == "completed" {
+				completed++
+			}
+		}
+		// Store percentage in Project.Progress if field exists
+		p.Progress = (completed * 100) / total
+	}
+	s.sendResponse(w, projects)
+}
 func (s *Server) createProject(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateProjectRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

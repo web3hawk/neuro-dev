@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Task struct {
-	ID           string      `json:"id"`
-	ProjectID    string      `json:"project_id"`
+	ID           string      `json:"id" gorm:"primaryKey;size:64"`
+	ProjectID    string      `json:"project_id" gorm:"index;size:64"`
 	Name         string      `json:"name"`
 	Description  string      `json:"description"`
 	Type         string      `json:"type"`
@@ -17,7 +17,7 @@ type Task struct {
 	Language     string      `json:"language"`
 	CreatedAt    time.Time   `json:"created_at"`
 	UpdatedAt    time.Time   `json:"updated_at"`
-	Results      TaskResults `json:"results"`
+	Results      TaskResults `json:"results" gorm:"embedded;embeddedPrefix:results_"`
 }
 
 type TaskResults struct {

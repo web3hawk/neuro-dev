@@ -11,6 +11,14 @@ import (
 )
 
 func main() {
+	// Allow overriding settings path from env if running from different working dir
+	if os.Getenv("NEURO_SETTINGS_PATH") == "" {
+		if _, err := os.Stat("./config/settings.yml"); err != nil {
+			// try default relative to apps/backend
+			_ = os.Setenv("NEURO_SETTINGS_PATH", "D:/code-work/go/work-space/neuro-dev/apps/backend/config/settings.yml")
+		}
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

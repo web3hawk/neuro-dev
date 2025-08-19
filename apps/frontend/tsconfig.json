@@ -15,7 +15,8 @@
     "isolatedModules": true,
     "allowJs": true,
     "baseUrl": "src",
-    "paths": {}
+    "paths": {},
+    "incremental": true,
   },
   "include": ["src"],
   "exclude": ["node_modules", "build", "scripts"]

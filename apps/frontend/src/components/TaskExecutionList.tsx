@@ -87,27 +87,27 @@ function TaskExecutionList() {
     setLoading(true);
     try {
       const projectsResponse = await api.get('/api/projects');
-      if ((projectsResponse as any).data && (projectsResponse as any).data.length > 0) {
-        const projectList = (projectsResponse as any).data as ProjectItem[];
-        setProjects(projectList);
+      // Backend wraps payload as { success: true, data: [...] }
+      const payload = (projectsResponse as any).data;
+      const list = Array.isArray(payload?.data) ? (payload.data as ProjectItem[]) : [];
+      setProjects(list);
 
-        const allTasks: TaskItem[] = [];
-        for (const project of projectList) {
-          try {
-            const tasksResponse = await api.get(`/api/projects/${project.id}/tasks`);
-            if ((tasksResponse as any).data?.success && (tasksResponse as any).data?.data) {
-              const projectTasks = ((tasksResponse as any).data.data as any[]).map(task => ({
-                ...task,
-                projectName: project.name
-              })) as TaskItem[];
-              allTasks.push(...projectTasks);
-            }
-          } catch (error) {
-            console.warn(`Failed to load tasks for project ${project.id}:`, error);
+      const allTasks: TaskItem[] = [];
+      for (const project of list) {
+        try {
+          const tasksResponse = await api.get(`/api/projects/${project.id}/tasks`);
+          if ((tasksResponse as any).data?.success && (tasksResponse as any).data?.data) {
+            const projectTasks = ((tasksResponse as any).data.data as any[]).map(task => ({
+              ...task,
+              projectName: project.name
+            })) as TaskItem[];
+            allTasks.push(...projectTasks);
           }
+        } catch (error) {
+          console.warn(`Failed to load tasks for project ${project.id}:`, error);
         }
-        setTasks(allTasks);
       }
+      setTasks(allTasks);
     } catch (error) {
       console.error('Failed to load data:', error);
       message.error('加载数据失败');
@@ -338,7 +338,7 @@ function TaskExecutionList() {
                   style={{ width: '100%' }}
                   allowClear
                 >
-                  {projects.map(project => (
+                  {(Array.isArray(projects) ? projects : []).map(project => (
                     <Option key={project.id} value={project.id}>
                       {project.name}
                     </Option>

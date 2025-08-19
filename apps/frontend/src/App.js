@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button, Typography, Space } from 'antd';
 import { 
   ProjectOutlined, 
@@ -18,7 +18,8 @@ const { useState, useEffect } = React;
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
 
-function App() {
+function AppLayout() {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKey, setSelectedKey] = useState('projects');
 
@@ -57,9 +58,21 @@ function App() {
     setSelectedKey(key);
   };
 
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.startsWith('/projects') || path.startsWith('/project/')) {
+      setSelectedKey('projects');
+    } else if (path.startsWith('/tasks')) {
+      setSelectedKey('tasks');
+    } else if (path.startsWith('/history')) {
+      setSelectedKey('history');
+    } else if (path.startsWith('/settings')) {
+      setSelectedKey('settings');
+    }
+  }, [location.pathname]);
+
   return (
-    <Router>
-      <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh' }}>
         <Sider 
           collapsible 
           collapsed={collapsed} 
@@ -86,7 +99,7 @@ function App() {
           >
             {menuItems.map(item => (
               <Menu.Item key={item.key} icon={item.icon}>
-                <a href={item.path}>{item.label}</a>
+                <Link to={item.path}>{item.label}</Link>
               </Menu.Item>
             ))}
           </Menu>
@@ -124,6 +137,13 @@ function App() {
           </Footer>
         </Layout>
       </Layout>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppLayout />
     </Router>
   );
 }

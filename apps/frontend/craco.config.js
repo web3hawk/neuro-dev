@@ -50,6 +50,18 @@ module.exports = {
               plugin.options.cache = false;
             }
           }
+          // 3) Ensure ForkTsChecker uses incremental with specified tsBuildInfoFile path
+          if (ctorName === 'ForkTsCheckerWebpackPlugin') {
+            plugin.options = plugin.options || {};
+            plugin.options.typescript = plugin.options.typescript || {};
+            // Ensure configOverwrite exists to inject compilerOptions overrides
+            plugin.options.typescript.configOverwrite = plugin.options.typescript.configOverwrite || {};
+            plugin.options.typescript.configOverwrite.compilerOptions = {
+              ...(plugin.options.typescript.configOverwrite.compilerOptions || {}),
+              incremental: true,
+              tsBuildInfoFile: require('path').resolve(__dirname, '../../lib/tsbuildinfo/build.tsbuildinfo'),
+            };
+          }
         });
       }
 

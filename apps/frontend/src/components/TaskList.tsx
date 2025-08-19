@@ -81,6 +81,36 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
     calculateStats();
   }, [tasks]);
 
+  // Poll task statuses to reflect real-time progress without mock data
+  useEffect(() => {
+    if (!projectId) return;
+    const active = tasks.filter(t => t.status === 'in_progress');
+    if (active.length === 0) return;
+    const timer = setInterval(async () => {
+      try {
+        const updates = await Promise.all(
+          active.map(async (t) => {
+            const res = await api.get(`/api/tasks/${t.id}/status`);
+            if ((res as any).data?.success) {
+              const d = (res as any).data.data || {};
+              return { id: t.id, ...d };
+            }
+            return null as any;
+          })
+        );
+        const map = new Map<string | number, any>();
+        updates.filter(Boolean).forEach((u: any) => map.set(u.id || (u as any).task_id, u));
+        setTasks(prev => prev.map(t => {
+          const u = map.get(t.id);
+          return u ? { ...t, status: u.status, progress: u.progress, current_phase: u.current_phase, updated_at: u.updated_at } : t;
+        }));
+      } catch (e) {
+        // ignore
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [projectId, tasks]);
+
   const loadTasks = async () => {
     try {
       setLoading(true);

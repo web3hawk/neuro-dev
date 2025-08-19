@@ -59,53 +59,20 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const mockProjects: ProjectItem[] = [
-        {
-          id: 'project_1',
-          name: 'Gomoku Game',
-          description: 'Develop a basic Gomoku game with AI opponent',
-          organization: 'DefaultOrganization',
-          model: 'GPT_3_5_TURBO',
-          status: 'completed',
-          progress: 100,
-          created_at: new Date(Date.now() - 86400000 * 2),
-          updated_at: new Date(Date.now() - 86400000 * 1),
-          tasks: [
-            { id: 'task_1', name: 'Game Logic', status: 'completed' },
-            { id: 'task_2', name: 'AI Algorithm', status: 'completed' },
-            { id: 'task_3', name: 'UI Design', status: 'completed' }
-          ]
-        },
-        {
-          id: 'project_2',
-          name: 'Weather Dashboard',
-          description: 'Build a weather dashboard with current conditions and forecasts',
-          organization: 'DefaultOrganization',
-          model: 'GPT_4',
-          status: 'running',
-          progress: 65,
-          created_at: new Date(Date.now() - 86400000 * 1),
-          updated_at: new Date(Date.now() - 3600000 * 2),
-          tasks: [
-            { id: 'task_4', name: 'API Integration', status: 'completed' },
-            { id: 'task_5', name: 'Dashboard UI', status: 'in_progress' },
-            { id: 'task_6', name: 'Data Visualization', status: 'pending' }
-          ]
-        },
-        {
-          id: 'project_3',
-          name: 'Task Manager',
-          description: 'Create a task management application with user authentication',
-          organization: 'MyCompany',
-          model: 'GPT_3_5_TURBO',
-          status: 'created',
-          progress: 0,
-          created_at: new Date(Date.now() - 3600000 * 6),
-          updated_at: new Date(Date.now() - 3600000 * 6),
-          tasks: []
-        }
-      ];
-      setProjects(mockProjects);
+      const res = await api.get('/api/projects');
+      if ((res as any).ok && (res as any).data?.success) {
+        const list = (res as any).data.data as ProjectItem[];
+        // Ensure progress is present; if not, compute from tasks
+        const normalized = list.map(p => {
+          const total = p.tasks?.length || 0;
+          const completed = (p.tasks || []).filter(t => t.status === 'completed').length;
+          const progress = total > 0 ? Math.round((completed / total) * 100) : (p.progress || 0);
+          return { ...p, progress } as ProjectItem;
+        });
+        setProjects(normalized);
+      } else {
+        setProjects([]);
+      }
     } catch (error) {
       console.error('Failed to load projects:', error);
       message.error('加载项目失败');

@@ -57,6 +57,12 @@ func (s *Server) getProjectTasks(w http.ResponseWriter, r *http.Request) {
 		s.sendError(w, "Project not found", http.StatusNotFound)
 		return
 	}
+	// Sync tasks with latest data from service map if available (ensures progress/status updates)
+	for i := range project.Tasks {
+		if t, ok := s.Svc.Tasks[project.Tasks[i].ID]; ok && t != nil {
+			project.Tasks[i] = *t
+		}
+	}
 	s.sendResponse(w, project.Tasks)
 }
 
