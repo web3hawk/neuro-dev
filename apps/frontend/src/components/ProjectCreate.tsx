@@ -53,15 +53,23 @@ function ProjectCreate() {
         api.get('/api/config/companies')
       ]);
       
+      let serverModels: string[] = [];
       if ((modelsRes as any).data?.success) {
-        setModels((modelsRes as any).data.data);
+        serverModels = (modelsRes as any).data.data || [];
       }
+      const localCustom = JSON.parse(localStorage.getItem('chatdev-models') || '[]');
+      const merged = Array.from(new Set([...(serverModels || []), ...(Array.isArray(localCustom) ? localCustom : [])]));
+      setModels(merged);
       
       if ((companiesRes as any).data?.success) {
         setCompanies((companiesRes as any).data.data);
       }
     } catch (error) {
       console.error('Failed to load configuration:', error);
+      const localCustom = JSON.parse(localStorage.getItem('chatdev-models') || '[]');
+      if (Array.isArray(localCustom)) {
+        setModels(localCustom);
+      }
       message.error('加载配置失败');
     }
   };

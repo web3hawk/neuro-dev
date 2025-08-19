@@ -11,12 +11,8 @@ import {
   Row,
   Col,
   message,
-  Alert,
-  Switch,
-  InputNumber,
   Table,
-  Modal,
-  Popconfirm
+  Modal
 } from 'antd';
 import {
   SettingOutlined,
@@ -24,8 +20,7 @@ import {
   ReloadOutlined,
   UserOutlined,
   PlusOutlined,
-  EditOutlined,
-  DeleteOutlined
+  EditOutlined
 } from '@ant-design/icons';
 import api from '../utils/apiClient';
 const { useState, useEffect } = React;
@@ -49,8 +44,11 @@ function Settings() {
   const [form] = Form.useForm<SettingsValues>();
   const [loading, setLoading] = useState(false);
   const [models, setModels] = useState<string[]>([]);
+  const [customModels, setCustomModels] = useState<string[]>([]);
+  const [newModel, setNewModel] = useState<string>("");
   const [companies, setCompanies] = useState<string[]>([]);
   const [roles, setRoles] = useState<Record<string, any>>({});
+  const [modelTokens, setModelTokens] = useState<Record<string, string>>({});
   const [editingRole, setEditingRole] = useState<any>(null);
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [settings, setSettings] = useState<SettingsValues>({
@@ -76,9 +74,24 @@ function Settings() {
         api.get('/api/models'),
         api.get('/api/config/companies')
       ]);
-      
+
+      let serverModels: string[] = [];
       if ((modelsRes as any).data?.success) {
-        setModels((modelsRes as any).data.data);
+        serverModels = (modelsRes as any).data.data || [];
+      }
+
+      // Load custom models from localStorage and merge (unique)
+      const localCustom = JSON.parse(localStorage.getItem('chatdev-models') || '[]');
+      if (Array.isArray(localCustom)) {
+        setCustomModels(localCustom);
+      }
+      const merged = Array.from(new Set([...(serverModels || []), ...(localCustom || [])]));
+      setModels(merged);
+
+      // Load model tokens from localStorage
+      const storedTokens = JSON.parse(localStorage.getItem('chatdev-modelTokens') || '{}');
+      if (storedTokens && typeof storedTokens === 'object') {
+        setModelTokens(storedTokens);
       }
       
       if ((companiesRes as any).data?.success) {
@@ -86,6 +99,17 @@ function Settings() {
       }
     } catch (error) {
       console.error('Failed to load configuration:', error);
+      // Fallback to local custom models if server fails
+      const localCustom = JSON.parse(localStorage.getItem('chatdev-models') || '[]');
+      if (Array.isArray(localCustom)) {
+        setCustomModels(localCustom);
+        setModels(localCustom);
+      }
+      // Try to still load tokens in fallback
+      const storedTokens = JSON.parse(localStorage.getItem('chatdev-modelTokens') || '{}');
+      if (storedTokens && typeof storedTokens === 'object') {
+        setModelTokens(storedTokens);
+      }
       message.error('加载配置失败');
     }
   };
@@ -103,23 +127,16 @@ function Settings() {
 
   const loadRoles = async () => {
     try {
-      const response = await fetch('/CompanyConfig/Default/RoleConfig.json');
-      if (response.ok) {
-        const roleData = await response.json();
-        setRoles(roleData);
+      const res = await api.get('/api/config/roles');
+      const payload = (res as any).data;
+      if (payload?.success) {
+        setRoles(payload.data || {});
+      } else {
+        message.error('加载角色失败');
       }
     } catch (error) {
       console.error('Failed to load roles:', error);
-      const defaultRoles = {
-        "首席执行官": [
-          "{chatdev_prompt}",
-          "您是首席执行官。现在，我们都在 ChatDev 工作，我们有着共同的兴趣，希望能够协作完成新客户分配的任务。",
-          "您的主要职责包括成为用户需求和其他关键政策问题的积极决策者、领导者、管理者和执行者。您的决策角色涉及关于政策和战略的高级决策；您的沟通角色可能涉及与组织的管理层和员工交流。",
-          "这是一个新客户的任务：{task}。",
-          "为了完成这个任务，我会给您一个或多个指令，您必须根据您的专业知识和我的需求，帮助我编写一个适当解决所要求指令的具体解决方案。"
-        ]
-      } as Record<string, any>;
-      setRoles(defaultRoles);
+      message.error('加载角色失败');
     }
   };
 
@@ -173,6 +190,26 @@ function Settings() {
     }
   };
 
+  const handleAddModel = () => {
+    const name = (newModel || '').trim();
+    if (!name) {
+      message.warning('请输入模型名称');
+      return;
+    }
+    if (models.includes(name)) {
+      message.info('该模型已存在');
+      return;
+    }
+    const updatedCustom = Array.from(new Set([...(customModels || []), name]));
+    setCustomModels(updatedCustom);
+    const merged = Array.from(new Set([...(models || []), name]));
+    setModels(merged);
+    localStorage.setItem('chatdev-models', JSON.stringify(updatedCustom));
+    setNewModel('');
+    message.success('已添加模型');
+  };
+
+
   const handleSave = async (values: SettingsValues) => {
     setLoading(true);
     try {
@@ -224,121 +261,9 @@ function Settings() {
         onFinish={handleSave}
         initialValues={settings}
       >
-        <Card title="默认项目设置" style={{ marginBottom: 24 }}>
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label="默认AI模型"
-                name="defaultModel"
-                rules={[{ required: true }]}
-              >
-                <Select placeholder="选择默认AI模型">
-                  {models.map(model => (
-                    <Option key={model} value={model}>{model}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label="默认配置"
-                name="defaultConfig"
-                rules={[{ required: true }]}
-              >
-                <Select placeholder="选择默认配置">
-                  {companies.map(company => (
-                    <Option key={company} value={company}>{company}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          
-          <Form.Item
-            label="默认组织机构"
-            name="defaultOrganization"
-            rules={[{ required: true }]}
-          >
-            <Input placeholder="输入默认组织机构名称" />
-          </Form.Item>
-        </Card>
 
-        <Card title="应用程序设置" style={{ marginBottom: 24 }}>
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label="最大并发项目数"
-                name="maxConcurrentProjects"
-                rules={[{ required: true, type: 'number', min: 1, max: 10 }]}
-              >
-                <InputNumber 
-                  min={1} 
-                  max={10} 
-                  style={{ width: '100%' }}
-                  placeholder="最大并发项目数"
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label="API超时时间（秒）"
-                name="apiTimeout"
-                rules={[{ required: true, type: 'number', min: 10, max: 300 }]}
-              >
-                <InputNumber 
-                  min={10} 
-                  max={300} 
-                  style={{ width: '100%' }}
-                  placeholder="API request timeout"
-                />
-              </Form.Item>
-            </Col>
-          </Row>
 
-          <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Form.Item
-                label="Enable Notifications"
-                name="enableNotifications"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item
-                label="Enable Auto Save"
-                name="enableAutoSave"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item
-                label="Theme"
-                name="theme"
-              >
-                <Select>
-                  <Option value="light">Light</Option>
-                  <Option value="dark">Dark</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        </Card>
-
-        <Card title="成员设置" style={{ marginBottom: 24 }}>
-          <div style={{ marginBottom: 16 }}>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
-              onClick={handleAddRole}
-            >
-              添加角色
-            </Button>
-          </div>
-          
+        <Card title="角色设置" style={{ marginBottom: 24 }}>
           <Table
             dataSource={Object.keys(roles).map(roleName => {
               const roleData = roles[roleName];
@@ -346,7 +271,7 @@ function Settings() {
               return {
                 key: roleName,
                 name: roleName,
-                description: isOldFormat ? 
+                description: isOldFormat ?
                   (roleData[1] ? roleData[1].substring(0, 100) + '...' : '无描述') :
                   (roleData.prompts && roleData.prompts[1] ? roleData.prompts[1].substring(0, 100) + '...' : '无描述'),
                 model: isOldFormat ? settings.defaultModel : (roleData.model || settings.defaultModel)
@@ -364,48 +289,59 @@ function Settings() {
                 dataIndex: 'description',
                 key: 'description',
               },
-              {
-                title: '使用模型',
-                dataIndex: 'model',
-                key: 'model',
-                width: 150,
-                render: (model: string) => (
-                  <span style={{ color: '#1890ff' }}>{model}</span>
-                )
-              },
-              {
-                title: '操作',
-                key: 'action',
-                width: 150,
-                render: (_: any, record: any) => (
-                  <Space size="small">
-                    <Button 
-                      size="small" 
-                      icon={<EditOutlined />} 
-                      onClick={() => handleEditRole(record.name)}
-                    >
-                      编辑
-                    </Button>
-                    <Popconfirm
-                      title="确定要删除这个角色吗？"
-                      onConfirm={() => handleDeleteRole(record.name)}
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <Button 
-                        size="small" 
-                        danger 
-                        icon={<DeleteOutlined />}
-                      >
-                        删除
-                      </Button>
-                    </Popconfirm>
-                  </Space>
-                ),
-              },
             ]}
             pagination={{ pageSize: 10 }}
           />
+        </Card>
+
+        <Card title="模型设置" style={{ marginBottom: 24 }}>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Row gutter={8}>
+              <Col flex="auto">
+                <Input
+                  placeholder="添加自定义模型名称，例如：GPT_4_1"
+                  value={newModel}
+                  onChange={(e) => setNewModel(e.target.value)}
+                  onPressEnter={() => handleAddModel()}
+                />
+              </Col>
+              <Col>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAddModel()}>
+                  添加模型
+                </Button>
+              </Col>
+            </Row>
+
+
+            <div>
+              <Title level={5}>可用模型（包含系统与自定义）</Title>
+              <Table
+                size="small"
+                dataSource={(models || []).map((m) => ({ key: m, name: m }))}
+                columns={[
+                  { title: '模型名称', dataIndex: 'name', key: 'name' },
+                  {
+                    title: 'Token',
+                    dataIndex: 'token',
+                    key: 'token',
+                    render: (_: any, record: any) => (
+                      <Input.Password
+                        placeholder="输入该模型的API Token"
+                        value={modelTokens[record.name] || ''}
+                        onChange={(e) => {
+                          const next = { ...(modelTokens || {}), [record.name]: e.target.value };
+                          setModelTokens(next);
+                          localStorage.setItem('chatdev-modelTokens', JSON.stringify(next));
+                        }}
+                      />
+                    )
+                  }
+                ]}
+                pagination={false}
+                locale={{ emptyText: '暂无可用模型' }}
+              />
+            </div>
+          </Space>
         </Card>
 
         <Card>

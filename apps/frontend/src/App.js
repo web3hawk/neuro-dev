@@ -13,6 +13,7 @@ import ProjectDetail from './components/ProjectDetail.tsx';
 import Settings from './components/Settings.tsx';
 import TaskExecutionList from './components/TaskExecutionList.tsx';
 import ProjectCreate from './components/ProjectCreate.tsx';
+import TaskCreate from './components/TaskCreate.tsx';
 import './App.css';
 
 const { useState, useEffect } = React;
@@ -128,6 +129,7 @@ function AppLayout() {
               <Route path="/projects" element={<ProjectList />} />
               <Route path="/create" element={<ProjectCreate />} />
               <Route path="/tasks" element={<TaskExecutionList />} />
+              <Route path="/tasks/create" element={<TaskCreate />} />
               <Route path="/project/:id" element={<ProjectDetail />} />
               <Route path="/history" element={<ProjectList showHistory={true} />} />
               <Route path="/settings" element={<Settings />} />

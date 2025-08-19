@@ -14,7 +14,8 @@ import {
   message,
   Progress,
   Tooltip,
-  Empty
+  Empty,
+  Popconfirm
 } from 'antd';
 import {
   SearchOutlined,
@@ -23,10 +24,13 @@ import {
   SyncOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
-  PlayCircleOutlined
+  PlayCircleOutlined,
+  PlusOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import moment, { Moment } from 'moment';
 import api from '../utils/apiClient';
+import { useNavigate, Link } from 'react-router-dom';
 const { useState, useEffect } = React;
 
 const { Title, Text } = Typography;
@@ -61,6 +65,7 @@ interface Filters {
 }
 
 function TaskExecutionList() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<TaskItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -226,6 +231,19 @@ function TaskExecutionList() {
     }
   };
 
+  const handleDeleteTask = async (taskId: string | number) => {
+    try {
+      const response = await api.delete(`/api/tasks/${taskId}`);
+      if ((response as any).data?.success) {
+        message.success('任务删除成功！');
+        loadData();
+      }
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      message.error('删除任务失败');
+    }
+  };
+
   const columns = [
     {
       title: '任务名称',
@@ -313,16 +331,39 @@ function TaskExecutionList() {
         </Tooltip>
       ),
     },
+    {
+      title: '操作',
+      key: 'actions',
+      render: (_: any, record: TaskItem) => (
+        <Space>
+          <Popconfirm
+            title="确定要删除这个任务吗？"
+            onConfirm={() => handleDeleteTask(record.id)}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button size="small" danger icon={<DeleteOutlined />}>删除</Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
-          <Title level={4}>任务</Title>
-          <Text type="secondary">
-            查看和筛选所有项目的任务执行情况
-          </Text>
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <Title level={4}>任务</Title>
+            <Text type="secondary">
+              查看和筛选所有项目的任务执行情况
+            </Text>
+          </div>
+          <div>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/tasks/create')}>
+              新增任务
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
