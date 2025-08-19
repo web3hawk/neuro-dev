@@ -34,4 +34,16 @@ settings:
     source: tcp(172.19.66.213:31225)/tasks
     user: pgadmin
     password: fzyun2025
+  llm:
+    # LLM API配置
+    # 支持的提供商: openai, anthropic, cohere
+    provider: openai
+    # API密钥
+    api_key: ${OPENAI_API_KEY}
+    # API基础URL (可选)
+    base_url: https://api.openai.com/v1
+    # 默认模型
+    model: gpt-3.5-turbo
+    # 请求超时时间 (秒)
+    timeout: 30
 
