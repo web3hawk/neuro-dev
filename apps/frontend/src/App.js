@@ -35,13 +35,13 @@ function AppLayout() {
     {
       key: 'tasks',
       icon: <UnorderedListOutlined />,
-      label: '任务',
+      label: '成本',
       path: '/tasks'
     },
     {
       key: 'history',
       icon: <HistoryOutlined />,
-      label: '计费',
+      label: '账簿',
       path: '/history'
     },
     {
