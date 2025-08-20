@@ -308,12 +308,6 @@ function TaskExecutionList() {
       ),
     },
     {
-      title: '分配角色',
-      dataIndex: 'assigned_role',
-      key: 'assigned_role',
-      render: (role: string | undefined) => role ? <Tag color="purple">{role}</Tag> : <Text type="secondary">未分配</Text>,
-    },
-    {
       title: '预计天数',
       dataIndex: 'estimated_days',
       key: 'estimated_days',
@@ -329,16 +323,6 @@ function TaskExecutionList() {
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: any) => (
-        <Tooltip title={moment(date).format('YYYY-MM-DD HH:mm:ss')}>
-          {moment(date).format('MM-DD HH:mm')}
-        </Tooltip>
-      ),
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
       render: (date: any) => (
         <Tooltip title={moment(date).format('YYYY-MM-DD HH:mm:ss')}>
           {moment(date).format('MM-DD HH:mm')}
