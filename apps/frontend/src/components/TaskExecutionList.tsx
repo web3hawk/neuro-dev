@@ -50,6 +50,8 @@ export interface TaskItem {
   priority?: number;
   status: TaskStatus;
   progress?: number;
+  estimated_days?: number;
+  estimated_cost?: number;
   created_at?: any;
   updated_at?: any;
 }
@@ -310,6 +312,18 @@ function TaskExecutionList() {
       dataIndex: 'assigned_role',
       key: 'assigned_role',
       render: (role: string | undefined) => role ? <Tag color="purple">{role}</Tag> : <Text type="secondary">未分配</Text>,
+    },
+    {
+      title: '预计天数',
+      dataIndex: 'estimated_days',
+      key: 'estimated_days',
+      render: (days: number) => days ? <Tag color="cyan">{days}天</Tag> : <Text type="secondary">未设置</Text>,
+    },
+    {
+      title: '预计成本',
+      dataIndex: 'estimated_cost',
+      key: 'estimated_cost',
+      render: (cost: number) => cost ? <Tag color="green">¥{cost.toLocaleString()}</Tag> : <Text type="secondary">未设置</Text>,
     },
     {
       title: '创建时间',

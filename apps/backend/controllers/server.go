@@ -77,6 +77,7 @@ func (s *Server) setupRoutes() {
 	api.HandleFunc("/models", s.createModel).Methods("POST")
 	api.HandleFunc("/models/{id}", s.updateModel).Methods("PUT")
 	api.HandleFunc("/models/{id}", s.deleteModel).Methods("DELETE")
+	api.HandleFunc("/models/{name}/token", s.updateModelToken).Methods("PUT")
 
 	// WebSocket
 	s.Router.HandleFunc("/ws/projects/{id}", s.handleWebSocket)

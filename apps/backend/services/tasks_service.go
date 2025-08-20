@@ -10,9 +10,10 @@ import (
 )
 
 // Task-related service methods
-func (s *Service) GenerateTasksFromDescription(description string, model string) []models.Task {
-	prompt := fmt.Sprintf(`作为一个软件项目经理，请将以下项目描述分解成具体的开发任务。每个任务应该包含：任务名称、详细描述、类型（feature/bug/enhancement）、优先级（1-5）、具体要求。
-
+func (s *Service) GenerateTasksFromDescription(description string, model string, vendors string) []models.Task {
+	prompt := fmt.Sprintf(`作为一个软件项目经理，请参考以下云厂商的功能：
+云厂商：%s
+将以下项目描述分解成具体的开发任务。每个任务应该包含：任务名称、详细描述、类型（研发/测试/运维）、优先级（1-5）、具体要求、预计研发天数、预计研发费用。
 项目描述：%s
 
 请以JSON格式返回任务列表，格式如下：
@@ -20,57 +21,22 @@ func (s *Service) GenerateTasksFromDescription(description string, model string)
   {
     "name": "任务名称",
     "description": "详细描述",
-    "type": "feature",
+    "type": "研发",
     "priority": 1,
-    "requirements": "具体技术要求"
+    "requirements": "具体要实现的功能",
+    "estimated_days": 5,
+    "estimated_cost": 12000
+
   }
 ]
 
-请生成3-5个任务，按优先级排序。`, description)
+请生成任务列表，按优先级排序。`, description, vendors)
 
 	tasks := s.callLLMAPI(prompt, model)
 	if len(tasks) == 0 {
-		return s.generateDefaultTasks(description)
+		return s.getFallbackTasks("")
 	}
 	return tasks
-}
-
-func (s *Service) generateDefaultTasks(description string) []models.Task {
-	return []models.Task{
-		{
-			ID:           uuid.NewString(),
-			Name:         "项目初始化",
-			Description:  "设置项目结构和基础配置",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     1,
-			Requirements: "项目架构、依赖管理、开发环境",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-		{
-			ID:           uuid.NewString(),
-			Name:         "核心功能开发",
-			Description:  "实现项目的主要功能模块",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     2,
-			Requirements: "业务逻辑、数据处理、用户交互",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-		{
-			ID:           uuid.NewString(),
-			Name:         "测试和部署",
-			Description:  "功能测试、性能优化和部署准备",
-			Type:         "enhancement",
-			Status:       "pending",
-			Priority:     3,
-			Requirements: "单元测试、部署配置、文档编写",
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
-		},
-	}
 }
 
 func (s *Service) NextTaskID() string {

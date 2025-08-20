@@ -113,11 +113,14 @@ function Settings() {
         setModels(serverModels);
       }
 
-      // Load model tokens from localStorage
-      const storedTokens = JSON.parse(localStorage.getItem('chatdev-modelTokens') || '{}');
-      if (storedTokens && typeof storedTokens === 'object') {
-        setModelTokens(storedTokens);
-      }
+      // Load model tokens from database (via serverModels response)
+      const tokensFromDB: Record<string, string> = {};
+      serverModels.forEach((model: any) => {
+        if (model.token) {
+          tokensFromDB[model.name] = model.token;
+        }
+      });
+      setModelTokens(tokensFromDB);
       
       if ((companiesRes as any).data?.success) {
         setCompanies((companiesRes as any).data.data);
@@ -130,11 +133,8 @@ function Settings() {
         setCustomModels(localCustom);
         setModels(localCustom);
       }
-      // Try to still load tokens in fallback
-      const storedTokens = JSON.parse(localStorage.getItem('chatdev-modelTokens') || '{}');
-      if (storedTokens && typeof storedTokens === 'object') {
-        setModelTokens(storedTokens);
-      }
+      // Initialize empty tokens on fallback since database is unavailable
+      setModelTokens({});
       message.error('加载配置失败');
     }
   };
@@ -450,10 +450,25 @@ function Settings() {
                       <Input.Password
                         placeholder="输入该模型的API Token"
                         value={modelTokens[record.name] || ''}
-                        onChange={(e) => {
-                          const next = { ...(modelTokens || {}), [record.name]: e.target.value };
+                        onChange={async (e) => {
+                          const tokenValue = e.target.value;
+                          const next = { ...(modelTokens || {}), [record.name]: tokenValue };
                           setModelTokens(next);
-                          localStorage.setItem('chatdev-modelTokens', JSON.stringify(next));
+                          
+                          // Save to database via API
+                          try {
+                            await fetch(`/api/models/${encodeURIComponent(record.name)}/token`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ token: tokenValue }),
+                            });
+                          } catch (error) {
+                            console.error('Failed to save token to database:', error);
+                            // Fallback to localStorage for now
+                            localStorage.setItem('chatdev-modelTokens', JSON.stringify(next));
+                          }
                         }}
                       />
                     )

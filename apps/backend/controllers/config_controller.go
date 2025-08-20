@@ -2,13 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
+	"neuro-dev/models"
 	"os"
 	"path/filepath"
-
-
-	"github.com/gorilla/mux"
-	"neuro-dev/models"
+	"strconv"
 )
 
 // Config-related handlers
@@ -95,6 +94,7 @@ func (s *Server) createModel(w http.ResponseWriter, r *http.Request) {
 	model := models.Model{
 		Name:     req.Name,
 		BaseURL:  req.BaseURL,
+		Token:    req.Token,
 		IsCustom: true,
 	}
 
@@ -133,9 +133,43 @@ func (s *Server) updateModel(w http.ResponseWriter, r *http.Request) {
 	if req.BaseURL != "" {
 		model.BaseURL = req.BaseURL
 	}
+	if req.Token != "" {
+		model.Token = req.Token
+	}
 
 	if err := s.Svc.DB.Save(&model).Error; err != nil {
 		s.sendError(w, "Failed to update model", http.StatusInternalServerError)
+		return
+	}
+
+	s.sendResponse(w, model)
+}
+
+func (s *Server) updateModelToken(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	modelName := vars["name"]
+	if modelName == "" {
+		s.sendError(w, "Model name is required", http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	var model models.Model
+	if err := s.Svc.DB.Where("name = ?", modelName).First(&model).Error; err != nil {
+		s.sendError(w, "Model not found", http.StatusNotFound)
+		return
+	}
+
+	model.Token = req.Token
+	if err := s.Svc.DB.Save(&model).Error; err != nil {
+		s.sendError(w, "Failed to update model token", http.StatusInternalServerError)
 		return
 	}
 

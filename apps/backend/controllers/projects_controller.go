@@ -67,7 +67,7 @@ func (s *Server) createProject(w http.ResponseWriter, r *http.Request) {
 		Tasks:        make([]models.Task, 0),
 	}
 
-	generatedTasks := s.Svc.GenerateTasksFromDescription(req.Description, req.Model)
+	generatedTasks := s.Svc.GenerateTasksFromDescription(req.Description, req.Model, req.Vendors)
 	// assign ProjectID and reset status for generated tasks
 	for i := range generatedTasks {
 		generatedTasks[i].ProjectID = projectID

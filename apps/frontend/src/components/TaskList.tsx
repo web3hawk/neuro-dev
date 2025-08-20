@@ -42,6 +42,8 @@ export interface TaskItem {
   priority?: number;
   progress?: number;
   current_phase?: string;
+  estimated_days?: number;
+  estimated_cost?: number;
   created_at?: string | Date;
   updated_at?: string | Date;
   [key: string]: any;
@@ -271,6 +273,18 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
           </div>
         </div>
       )
+    },
+    {
+      title: '预计天数',
+      dataIndex: 'estimated_days',
+      key: 'estimated_days',
+      render: (days: number) => days ? <Tag color="cyan">{days}天</Tag> : <Tag color="default">未设置</Tag>
+    },
+    {
+      title: '预计成本',
+      dataIndex: 'estimated_cost',
+      key: 'estimated_cost',
+      render: (cost: number) => cost ? <Tag color="green">¥{cost.toLocaleString()}</Tag> : <Tag color="default">未设置</Tag>
     },
     {
       title: '创建时间',

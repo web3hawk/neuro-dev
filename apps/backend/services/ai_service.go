@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -10,88 +11,54 @@ import (
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"neuro-dev/config"
 	"neuro-dev/models"
 )
 
 func (s *Service) callLLMAPI(prompt string, model string) []models.Task {
-	// Load configuration
-	cfg, err := config.Load()
+	// Load configuration for API key (still needed)
+
+	// Get model properties from database using ModelService
+	modelData, err := s.ModelService.GetModelByName(model)
 	if err != nil {
-		log.Printf("Failed to load config: %v", err)
-		return s.getFallbackTasks()
+		log.Printf("Failed to find model '%s' in database: %v", model, err)
+		return s.getFallbackTasks(err.Error())
 	}
 
-	// Create OpenAI client
+	// Create OpenAI client using model data from database
 	llm, err := openai.New(
-		openai.WithToken(cfg.LLM.ApiKey),
-		openai.WithModel(cfg.LLM.Model),
-		openai.WithBaseURL(cfg.LLM.BaseURL),
+		openai.WithToken(modelData.Token),
+		openai.WithModel(modelData.Name),
+		openai.WithBaseURL(modelData.BaseURL),
 	)
 	if err != nil {
 		log.Printf("Failed to create OpenAI client: %v", err)
-		return s.getFallbackTasks()
+		return s.getFallbackTasks(err.Error())
 	}
-
-	// Create the full prompt for task generation
-	fullPrompt := fmt.Sprintf(`基于以下项目描述，请生成详细的开发任务清单。每个任务应该包含任务名称、描述、类型、优先级、负责角色和具体要求。
-
-项目描述: %s
-
-请按照以下JSON格式返回任务清单:
-[
-  {
-    "name": "任务名称",
-    "description": "任务描述",
-    "type": "feature/enhancement/bug",
-    "priority": 1,
-    "assigned_role": "角色",
-    "requirements": "具体要求"
-  }
-]
-
-请生成4-6个具体的开发任务。`, prompt)
 
 	ctx := context.Background()
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, fullPrompt),
+		llms.TextParts(llms.ChatMessageTypeHuman, prompt),
 	}
 
 	response, err := llm.GenerateContent(ctx, content, llms.WithTemperature(0.7))
 	if err != nil {
 		log.Printf("Failed to generate content: %v", err)
-		return s.getFallbackTasks()
+		return s.getFallbackTasks(err.Error())
 	}
 
 	// Parse the response and convert to tasks
 	tasks := s.parseTasksFromResponse(response.Choices[0].Content)
-	if len(tasks) == 0 {
-		log.Printf("Failed to parse tasks from LLM response")
-		return s.getFallbackTasks()
-	}
 
 	return tasks
 }
 
 // getFallbackTasks returns default tasks when LLM API fails
-func (s *Service) getFallbackTasks() []models.Task {
+func (s *Service) getFallbackTasks(desc string) []models.Task {
 	baseTime := time.Now()
 	return []models.Task{
 		{
 			ID:           uuid.NewString(),
-			Name:         "需求分析",
-			Description:  "分析项目需求并制定开发计划",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     1,
-			AssignedRole: "analyst",
-			Requirements: "需求文档、技术规格、用户故事",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		},
-		{
-			ID:           uuid.NewString(),
-			Name:         "系统设计",
+			Name:         "生成任务失败",
 			Description:  "设计系统架构和技术方案",
 			Type:         "feature",
 			Status:       "pending",
@@ -106,85 +73,63 @@ func (s *Service) getFallbackTasks() []models.Task {
 
 // parseTasksFromResponse parses LLM response to extract tasks
 func (s *Service) parseTasksFromResponse(response string) []models.Task {
-	// Simple parsing - in production, use proper JSON parsing
+	// Define a struct to match the JSON format from LLM response
+	type TaskFromLLM struct {
+		Name          string  `json:"name"`
+		Description   string  `json:"description"`
+		Type          string  `json:"type"`
+		Priority      int     `json:"priority"`
+		AssignedRole  string  `json:"assigned_role"`
+		Requirements  string  `json:"requirements"`
+		EstimatedDays int     `json:"estimated_days"`
+		EstimatedCost float64 `json:"estimated_cost"`
+	}
+
 	tasks := []models.Task{}
 	baseTime := time.Now()
 
-	// For now, create tasks based on common patterns in the response
-	if strings.Contains(response, "需求") || strings.Contains(response, "分析") {
-		tasks = append(tasks, models.Task{
-			ID:           uuid.NewString(),
-			Name:         "需求分析与规划",
-			Description:  "基于LLM分析的项目需求进行详细规划",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     1,
-			AssignedRole: "analyst",
-			Requirements: "根据LLM建议进行需求分析",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		})
+	// Try to extract JSON from the response (LLM might return text with JSON embedded)
+	jsonStart := strings.Index(response, "[")
+	jsonEnd := strings.LastIndex(response, "]")
+
+	if jsonStart == -1 || jsonEnd == -1 || jsonStart >= jsonEnd {
+		err := fmt.Errorf("No valid JSON array found in response", response)
+		log.Printf("No valid JSON array found in response")
+		return s.getFallbackTasks(err.Error())
 	}
 
-	if strings.Contains(response, "设计") || strings.Contains(response, "架构") {
-		tasks = append(tasks, models.Task{
-			ID:           uuid.NewString(),
-			Name:         "系统设计",
-			Description:  "基于LLM建议进行系统架构设计",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     2,
-			AssignedRole: "architect",
-			Requirements: "按照LLM提供的架构建议进行设计",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		})
+	jsonStr := response[jsonStart : jsonEnd+1]
+
+	// Parse JSON array
+	var llmTasks []TaskFromLLM
+	err := json.Unmarshal([]byte(jsonStr), &llmTasks)
+	if err != nil {
+		log.Printf("Failed to parse JSON from LLM response: %v", err)
+		return s.getFallbackTasks(err.Error())
 	}
 
-	if strings.Contains(response, "开发") || strings.Contains(response, "实现") {
-		tasks = append(tasks, models.Task{
-			ID:           uuid.NewString(),
-			Name:         "功能开发",
-			Description:  "根据LLM建议实现核心功能",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     3,
-			AssignedRole: "developer",
-			Requirements: "按照LLM指导进行功能实现",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		})
+	// Convert LLM tasks to models.Task
+	for _, llmTask := range llmTasks {
+		task := models.Task{
+			ID:            uuid.NewString(),
+			Name:          llmTask.Name,
+			Description:   llmTask.Description,
+			Type:          llmTask.Type,
+			Status:        "pending", // Default status
+			Priority:      llmTask.Priority,
+			AssignedRole:  llmTask.AssignedRole,
+			Requirements:  llmTask.Requirements,
+			EstimatedDays: llmTask.EstimatedDays,
+			EstimatedCost: llmTask.EstimatedCost,
+			CreatedAt:     baseTime,
+			UpdatedAt:     baseTime,
+		}
+		tasks = append(tasks, task)
 	}
 
-	if strings.Contains(response, "测试") {
-		tasks = append(tasks, models.Task{
-			ID:           uuid.NewString(),
-			Name:         "测试验证",
-			Description:  "按照LLM建议进行全面测试",
-			Type:         "enhancement",
-			Status:       "pending",
-			Priority:     4,
-			AssignedRole: "tester",
-			Requirements: "根据LLM提供的测试策略进行验证",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		})
-	}
-
-	// If no tasks were generated, return at least one default task
+	// If no tasks were parsed successfully, return at least one default task
 	if len(tasks) == 0 {
-		tasks = append(tasks, models.Task{
-			ID:           uuid.NewString(),
-			Name:         "AI生成任务",
-			Description:  "基于LLM生成的开发任务",
-			Type:         "feature",
-			Status:       "pending",
-			Priority:     1,
-			AssignedRole: "developer",
-			Requirements: "按照AI建议执行",
-			CreatedAt:    baseTime,
-			UpdatedAt:    baseTime,
-		})
+		return s.getFallbackTasks(err.Error())
 	}
 
 	return tasks

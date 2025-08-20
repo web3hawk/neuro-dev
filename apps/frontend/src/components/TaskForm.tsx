@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Form,
   Input,
+  InputNumber,
   Select,
   Button,
   Space,
@@ -25,6 +26,8 @@ export interface TaskFormValues {
   type: string;
   priority: number;
   requirements?: string;
+  estimated_days?: number;
+  estimated_cost?: number;
 }
 
 interface TaskFormProps {
@@ -45,6 +48,8 @@ function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
         type: (task as any).type || 'feature',
         priority: (task as any).priority || 3,
         requirements: (task as any).requirements,
+        estimated_days: (task as any).estimated_days,
+        estimated_cost: (task as any).estimated_cost,
       } as any);
     } else {
       form.resetFields();
@@ -162,6 +167,43 @@ function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                 </Option>
               ))}
             </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={16}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="预计天数"
+            name="estimated_days"
+            extra="预计完成任务所需的工作天数"
+          >
+            <InputNumber
+              size="large"
+              min={1}
+              max={365}
+              placeholder="例如：5"
+              style={{ width: '100%' }}
+              addonAfter="天"
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            label="预计成本"
+            name="estimated_cost"
+            extra="预计完成任务所需的开发成本（元）"
+          >
+            <InputNumber<number>
+                size="large"
+                min={0 as number}
+                max={1000000 as number}
+                placeholder="例如：12000"
+                style={{ width: '100%' }}
+                formatter={(value) => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => Number((value ?? '').toString().replace(/¥\s?|,/g, ''))}
+            />
+
           </Form.Item>
         </Col>
       </Row>

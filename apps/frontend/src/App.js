@@ -87,7 +87,7 @@ function AppLayout() {
               <GithubOutlined style={{ color: '#1890ff', fontSize: '24px' }} />
               {!collapsed && (
                 <Title level={4} style={{ color: 'white', margin: 0 }}>
-                  NeuroPool
+                  AuroraSpend
                 </Title>
               )}
             </Space>
@@ -116,7 +116,7 @@ function AppLayout() {
               height: '100%'
             }}>
               <Title level={3} style={{ color: 'white', margin: 0 }}>
-                AI驱动的任务平台
+                AI驱动的成本治理平台
               </Title>
               <Space>
               </Space>
@@ -137,7 +137,7 @@ function AppLayout() {
           </Content>
 
           <Footer style={{ textAlign: 'center' }}>
-            NeuroPool Go-React ©2025 - AI驱动的任务平台
+            AuroraSpend 极光省 ©2025 - Light Up Savings, Not Bills.
           </Footer>
         </Layout>
       </Layout>
