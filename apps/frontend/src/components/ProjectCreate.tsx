@@ -156,7 +156,7 @@ function ProjectCreate() {
                     loading={models.length === 0}
                   >
                     {models.map((model: any) => (
-                      <Select.Option key={model.id} value={model.name}>
+                      <Select.Option key={model.id} value={model.id}>
                         {model.name}
                       </Select.Option>
                     ))}

@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.co
 	"net/http"
-"
-	"n
 	"os"
 	"path/filepath"
+
+
 	"github.com/gorilla/mux"
+	"neuro-dev/models"
 )
 
 // Config-related handlers
@@ -59,8 +59,8 @@ func (s *Server) getModels(w http.ResponseWriter, r *http.Request) {
 	if err := s.Svc.DB.Find(&modelList).Error; err != nil {
 		s.sendError(w, "Failed to fetch models from database", http.StatusInternalServerError)
 		return
+	}
 
-	
 	// If no models in database, initialize with default models
 	if len(modelList) == 0 {
 		defaultModels := []string{"GPT_3_5_TURBO", "GPT_4", "GPT_4_TURBO", "GPT_4O", "GPT_4O_MINI"}
@@ -73,8 +73,8 @@ func (s *Server) getModels(w http.ResponseWriter, r *http.Request) {
 			s.Svc.DB.Create(&model)
 			modelList = append(modelList, model)
 		}
+	}
 
-	
 	s.sendResponse(w, modelList)
 }
 
