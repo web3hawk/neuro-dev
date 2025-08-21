@@ -41,7 +41,7 @@ function AppLayout() {
     {
       key: 'history',
       icon: <HistoryOutlined />,
-      label: '账簿',
+      label: '账单',
       path: '/history'
     },
     {

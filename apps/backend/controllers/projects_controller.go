@@ -222,3 +222,41 @@ func (s *Server) downloadProject(w http.ResponseWriter, r *http.Request) {
 		"total_tasks":  len(project.Tasks),
 	})
 }
+
+func (s *Server) deleteProject(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectID := vars["id"]
+
+	// Check if project exists
+	var project models.Project
+	if err := s.Svc.DB.First(&project, "id = ?", projectID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			s.sendError(w, "Project not found", http.StatusNotFound)
+		} else {
+			s.sendError(w, "Failed to check project existence", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Delete project and associated tasks in a transaction
+	if err := s.Svc.DB.Transaction(func(tx *gorm.DB) error {
+		// Due to CASCADE constraint, deleting the project will automatically delete associated tasks
+		if err := tx.Delete(&project).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		log.Printf("Failed to delete project %s: %v", projectID, err)
+		s.sendError(w, "Failed to delete project", http.StatusInternalServerError)
+		return
+	}
+
+	// Remove from in-memory map if it exists
+	delete(s.Svc.Projects, projectID)
+
+	log.Printf("Successfully deleted project %s and its associated tasks", projectID)
+	s.sendResponse(w, map[string]interface{}{
+		"success": true,
+		"message": "Project and associated tasks deleted successfully",
+	})
+}

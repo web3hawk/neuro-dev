@@ -96,8 +96,16 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    message.success('项目删除成功！');
-    loadProjects();
+    try {
+      const response = await api.delete(`/api/projects/${projectId}`);
+      if ((response as any).data?.success) {
+        message.success('项目删除成功！');
+        loadProjects();
+      }
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      message.error('删除项目失败');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -108,6 +116,16 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
       'failed': 'error'
     };
     return colors[status] || 'default';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'created': '创建中',
+      'running': '开发中',
+      'completed': '已完成',
+      'failed': '失败'
+    };
+    return labels[status] || status.toUpperCase();
   };
 
   const filteredProjects = projects.filter(project => {
@@ -144,7 +162,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
       render: (status: string, record: ProjectItem) => (
         <Space direction="vertical" size={0}>
           <Tag color={getStatusColor(status)}>
-            {status.toUpperCase()}
+            {getStatusLabel(status)}
           </Tag>
           <Typography.Text type="secondary" style={{ fontSize: 11 }}>
             {record.tasks.length} 个任务

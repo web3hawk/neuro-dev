@@ -54,6 +54,7 @@ func (s *Server) setupRoutes() {
 	api.HandleFunc("/projects", s.listProjects).Methods("GET")
 	api.HandleFunc("/projects", s.createProject).Methods("POST")
 	api.HandleFunc("/projects/{id}", s.getProject).Methods("GET")
+	api.HandleFunc("/projects/{id}", s.deleteProject).Methods("DELETE")
 	api.HandleFunc("/projects/{id}/status", s.getProjectStatus).Methods("GET")
 	api.HandleFunc("/projects/{id}/start", s.startProject).Methods("POST")
 	api.HandleFunc("/projects/{id}/logs", s.getProjectLogs).Methods("GET")

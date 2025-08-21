@@ -62,7 +62,7 @@ function ProjectCreate() {
 
       if ((response as any).data?.success) {
         message.success('项目创建成功！');
-        navigate(`/project/${(response as any).data.data.id}`);
+        navigate('/projects');
       } else {
         message.error('创建项目失败');
       }

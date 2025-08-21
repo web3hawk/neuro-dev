@@ -59,8 +59,8 @@ func (s *Service) getFallbackTasks(desc string) []models.Task {
 		{
 			ID:           uuid.NewString(),
 			Name:         "生成任务失败",
-			Description:  "设计系统架构和技术方案",
-			Type:         "feature",
+			Description:  desc,
+			Type:         "bug",
 			Status:       "pending",
 			Priority:     2,
 			AssignedRole: "architect",
@@ -86,7 +86,6 @@ func (s *Service) parseTasksFromResponse(response string) []models.Task {
 	}
 
 	tasks := []models.Task{}
-	baseTime := time.Now()
 
 	// Try to extract JSON from the response (LLM might return text with JSON embedded)
 	jsonStart := strings.Index(response, "[")
@@ -104,6 +103,7 @@ func (s *Service) parseTasksFromResponse(response string) []models.Task {
 	var llmTasks []TaskFromLLM
 	err := json.Unmarshal([]byte(jsonStr), &llmTasks)
 	if err != nil {
+		log.Printf("JSON: %v", jsonStr)
 		log.Printf("Failed to parse JSON from LLM response: %v", err)
 		return s.getFallbackTasks(err.Error())
 	}
@@ -121,8 +121,8 @@ func (s *Service) parseTasksFromResponse(response string) []models.Task {
 			Requirements:  llmTask.Requirements,
 			EstimatedDays: llmTask.EstimatedDays,
 			EstimatedCost: llmTask.EstimatedCost,
-			CreatedAt:     baseTime,
-			UpdatedAt:     baseTime,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
 		}
 		tasks = append(tasks, task)
 	}
