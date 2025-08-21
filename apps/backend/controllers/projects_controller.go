@@ -327,7 +327,7 @@ func (s *Server) getProjectLogs(w http.ResponseWriter, r *http.Request) {
 	// Add status-based logs
 	switch project.Status {
 	case "created":
-		logs = append(logs, "项目已创建，准备启动...")
+		logs = append(logs, "项目已创建，准备创建任务...")
 	case "running":
 		logs = append(logs, "项目正在运行中...")
 		logs = append(logs, "项目启动成功...")
