@@ -10,9 +10,11 @@ import {
 } from '@ant-design/icons';
 import ProjectList from './components/ProjectList.tsx';
 import ProjectDetail from './components/ProjectDetail.tsx';
+import ProjectLogs from './components/ProjectLogs.tsx';
 import Settings from './components/Settings.tsx';
 import TaskExecutionList from './components/TaskExecutionList.tsx';
 import ProjectCreate from './components/ProjectCreate.tsx';
+import ProjectEdit from './components/ProjectEdit.tsx';
 import TaskCreate from './components/TaskCreate.tsx';
 import './App.css';
 
@@ -130,7 +132,9 @@ function AppLayout() {
               <Route path="/create" element={<ProjectCreate />} />
               <Route path="/tasks" element={<TaskExecutionList />} />
               <Route path="/tasks/create" element={<TaskCreate />} />
+              <Route path="/project/:id/edit" element={<ProjectEdit />} />
               <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/project/:id/logs" element={<ProjectLogs />} />
               <Route path="/history" element={<ProjectList showHistory={true} />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>

@@ -18,7 +18,7 @@ import {
 } from 'antd';
 import {
   PlayCircleOutlined,
-  EyeOutlined,
+  EditOutlined,
   DeleteOutlined,
   SearchOutlined,
   PlusOutlined,
@@ -40,6 +40,7 @@ interface ProjectItem {
   model: string;
   status: 'created' | 'running' | 'completed' | 'failed' | string;
   progress: number;
+  estimated_cost: number;
   created_at: any;
   updated_at: any;
   tasks: { id: string; name: string; status: string }[];
@@ -83,14 +84,22 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
 
   const handleStartProject = async (projectId: string) => {
     try {
-      const response = await api.post(`/api/projects/${projectId}/start`);
-      if ((response as any).data?.success) {
-        message.success('项目启动成功！');
-        loadProjects();
-        navigate(`/project/${projectId}`);
-      }
+      // Start the project in the backend
+      api.post(`/api/projects/${projectId}/start`).then(response => {
+        if ((response as any).data?.success) {
+          message.success('项目启动成功！');
+          loadProjects();
+        }
+      }).catch(error => {
+        console.error('Failed to start project:', error);
+        message.error('启动项目失败');
+      });
+      
+      // Immediately redirect to logs page without waiting for completion
+      message.info('正在启动项目，跳转到日志页面...');
+      navigate(`/project/${projectId}/logs`);
     } catch (error) {
-      console.error('Failed to start project:', error);
+      console.error('Failed to initiate project start:', error);
       message.error('启动项目失败');
     }
   };
@@ -120,7 +129,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      'created': '创建中',
+      'created': '已创建',
       'running': '开发中',
       'completed': '已完成',
       'failed': '失败'
@@ -185,10 +194,14 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
       )
     },
     {
-      title: '模型',
-      dataIndex: 'model',
-      key: 'model',
-      render: (model: string) => <Tag>{model}</Tag>
+      title: '预计成本',
+      dataIndex: 'estimated_cost',
+      key: 'estimated_cost',
+      render: (cost: number) => (
+        <span style={{ fontWeight: 500 }}>
+          ¥{cost ? cost.toFixed(2) : '0.00'}
+        </span>
+      )
     },
     {
       title: '创建时间',
@@ -202,11 +215,11 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
       render: (_: any, record: ProjectItem) => (
         <Space>
           <Button 
-            icon={<EyeOutlined />} 
+            icon={<EditOutlined />} 
             size="small"
-            onClick={() => navigate(`/project/${record.id}`)}
+            onClick={() => navigate(`/project/${record.id}/edit`)}
           >
-            查看
+            编辑
           </Button>
           {record.status === 'created' && (
             <Button 
@@ -268,7 +281,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
         </Col>
         <Col span={6}>
           <Card>
-            <Statistic title="运行中" value={stats.running} valueStyle={{ color: '#1890ff' }} />
+            <Statistic title="开发中" value={stats.running} valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
         <Col span={6}>
@@ -303,7 +316,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
             >
               <Option value="all">全部状态</Option>
               <Option value="created">已创建</Option>
-              <Option value="running">运行中</Option>
+              <Option value="running">开发中</Option>
               <Option value="completed">已完成</Option>
               <Option value="failed">失败</Option>
             </Select>
