@@ -228,7 +228,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
               size="small"
               onClick={() => handleStartProject(record.id)}
             >
-              启动
+              执行
             </Button>
           )}
           <Button 

@@ -304,7 +304,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
               icon={<PlayCircleOutlined />}
               onClick={() => handleStartTask(record.id)}
             >
-              启动
+              执行
             </Button>
           )}
           <Button
