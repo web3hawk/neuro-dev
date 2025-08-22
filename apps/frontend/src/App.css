@@ -19,6 +19,25 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+.aurora-logo {
+  background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.1) 0%, rgba(0, 153, 255, 0.1) 50%, rgba(153, 102, 255, 0.1) 100%);
+  animation: aurora-glow 3s ease-in-out infinite alternate;
+}
+
+.aurora-logo:hover {
+  background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.2) 0%, rgba(0, 153, 255, 0.2) 50%, rgba(153, 102, 255, 0.2) 100%);
+  transform: scale(1.02);
+}
+
+@keyframes aurora-glow {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 30px rgba(0, 153, 255, 0.2), 0 0 40px rgba(153, 102, 255, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 153, 255, 0.3), 0 0 50px rgba(153, 102, 255, 0.2);
+  }
+}
+
 .site-layout {
   transition: margin-left 0.2s;
 }

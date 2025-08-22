@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } f
 import { Layout, Menu, Button, Typography, Space } from 'antd';
 import { 
   ProjectOutlined, 
-  HistoryOutlined, 
+  FileTextOutlined, 
   SettingOutlined,
-  GithubOutlined,
+  ThunderboltOutlined,
   UnorderedListOutlined 
 } from '@ant-design/icons';
 import ProjectList from './components/ProjectList.tsx';
@@ -16,6 +16,7 @@ import TaskCostList from './components/TaskCostList.tsx';
 import ProjectCreate from './components/ProjectCreate.tsx';
 import ProjectEdit from './components/ProjectEdit.tsx';
 import TaskCostCreate from './components/TaskCostCreate.tsx';
+import BillingList from './components/BillingList.tsx';
 import './App.css';
 
 const { useState, useEffect } = React;
@@ -41,10 +42,10 @@ function AppLayout() {
       path: '/tasks'
     },
     {
-      key: 'history',
-      icon: <HistoryOutlined />,
-      label: '账单核对',
-      path: '/history'
+      key: 'billing',
+      icon: <FileTextOutlined />,
+      label: '服务账单',
+      path: '/billing'
     },
     {
       key: 'settings',
@@ -68,8 +69,8 @@ function AppLayout() {
       setSelectedKey('projects');
     } else if (path.startsWith('/tasks')) {
       setSelectedKey('tasks');
-    } else if (path.startsWith('/history')) {
-      setSelectedKey('history');
+    } else if (path.startsWith('/billing')) {
+      setSelectedKey('billing');
     } else if (path.startsWith('/settings')) {
       setSelectedKey('settings');
     }
@@ -84,12 +85,25 @@ function AppLayout() {
           theme="dark"
           width={250}
         >
-          <div className="logo">
+          <div className="logo aurora-logo">
             <Space align="center" style={{ width: '100%', padding: '16px' }}>
-              <GithubOutlined style={{ color: '#1890ff', fontSize: '24px' }} />
+              <ThunderboltOutlined style={{ 
+                background: 'linear-gradient(135deg, #00ff88, #0099ff, #9966ff)', 
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontSize: '28px',
+                filter: 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.5))'
+              }} />
               {!collapsed && (
-                <Title level={4} style={{ color: 'white', margin: 0 }}>
-                  AuroraSpend
+                <Title level={4} style={{ 
+                  background: 'linear-gradient(135deg, #00ff88, #0099ff, #9966ff)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  margin: 0,
+                  fontWeight: 'bold',
+                  textShadow: '0 0 20px rgba(0, 255, 136, 0.3)'
+                }}>
+                  Aurora
                 </Title>
               )}
             </Space>
@@ -135,7 +149,7 @@ function AppLayout() {
               <Route path="/project/:id/edit" element={<ProjectEdit />} />
               <Route path="/project/:id" element={<ProjectDetail />} />
               <Route path="/project/:id/logs" element={<ProjectLogs />} />
-              <Route path="/history" element={<ProjectList showHistory={true} />} />
+              <Route path="/billing" element={<BillingList />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </Content>
