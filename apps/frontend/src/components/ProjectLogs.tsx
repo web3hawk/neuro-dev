@@ -175,28 +175,6 @@ const ProjectLogs: React.FC = () => {
           </Button>
         </div>
 
-        {/* Status Card */}
-        {projectStatus && (
-          <Card title="项目状态" size="small">
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <div>
-                <Text strong>状态: </Text>
-                <Text type={getStatusColor(projectStatus.status) === 'error' ? 'danger' : 'success'}>
-                  {getStatusText(projectStatus.status)}
-                </Text>
-              </div>
-              <div>
-                <Text strong>进度: </Text>
-                <Progress 
-                  percent={projectStatus.progress} 
-                  status={getStatusColor(projectStatus.status) as any}
-                  format={() => `${projectStatus.completed_tasks}/${projectStatus.total_tasks} 任务`}
-                />
-              </div>
-            </Space>
-          </Card>
-        )}
-
         {/* Logs Card */}
         <Card 
           title="实时日志" 
