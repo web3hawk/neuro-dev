@@ -2,23 +2,68 @@
   "name": "neuro-dev",
   "version": "1.0.0",
   "description": "ai战队",
-  "workspaces": [
-    "./apps/frontend"
-  ],
   "scripts": {
-    "neuro-fe": "npm run start --workspace ./apps/frontend",
-    "neuro-clean-install": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json & npm install & cd apps\\frontend & npm install --no-package-lock",
-    "neuro-install": "npm ci",
-    "neuro-clean": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json",
-    "neuro-build": "npm run build --workspace ./apps/frontend"
+    "start": "cd apps/frontend && craco start",
+    "build": "cd apps/frontend && craco build",
+    "test": "cd apps/frontend && craco test",
+    "dev": "cd apps/frontend && craco start",
+    "frontend:start": "cd apps/frontend && craco start",
+    "frontend:build": "cd apps/frontend && craco build",
+    "frontend:test": "cd apps/frontend && craco test",
+    "eject": "cd apps/frontend && react-scripts eject",
+    "typecheck": "cd apps/frontend && tsc --noEmit",
+    "install:all": "npm install",
+    "clean": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json",
+    "clean:install": "npm run clean && npm install"
   },
   "author": "kevin",
   "license": "MIT",
   "dependencies": {
-    "chatdev-frontend": "^1.0.0"
+    "@ant-design/icons": "^4.7.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "ajv": "^8.17.1",
+    "antd": "^4.21.3",
+    "axios": "^0.27.2",
+    "moment": "^2.29.3",
+    "prismjs": "^1.28.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "socket.io-client": "^4.5.1"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@types/jest": "^29.5.12",
+    "@types/moment": "^2.13.0",
     "@types/node": "^20.14.12",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@types/react-router-dom": "^5.3.3",
+    "cross-env": "^10.0.0",
+    "eslint": "^8.57.0",
     "typescript": "^5.6.2"
-  }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://172.19.206.103:8080"
 }
