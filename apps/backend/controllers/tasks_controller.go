@@ -30,19 +30,29 @@ func (s *Server) createTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	taskID := s.Svc.NextTaskID()
+
+	// 设置默认费用类型为预算
+	expenseType := req.ExpenseType
+	if expenseType == "" {
+		expenseType = "budget"
+	}
+
 	task := models.Task{
-		ID:           taskID,
-		ProjectID:    projectID,
-		Name:         req.Name,
-		Description:  req.Description,
-		Type:         req.Type,
-		Status:       "pending",
-		Priority:     req.Priority,
-		Requirements: req.Requirements,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
-		Progress:     0,
-		Results:      models.TaskResults{},
+		ID:            taskID,
+		ProjectID:     projectID,
+		Name:          req.Name,
+		Description:   req.Description,
+		Type:          req.Type,
+		Status:        "pending",
+		Priority:      req.Priority,
+		Requirements:  req.Requirements,
+		EstimatedDays: req.EstimatedDays,
+		EstimatedCost: req.EstimatedCost,
+		ExpenseType:   expenseType,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+		Progress:      0,
+		Results:       models.TaskResults{},
 	}
 	if err := s.Svc.DB.Create(&task).Error; err != nil {
 		s.sendError(w, "Failed to create task", http.StatusInternalServerError)
@@ -103,6 +113,15 @@ func (s *Server) updateTask(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.Requirements != "" {
 		task.Requirements = req.Requirements
+	}
+	if req.EstimatedDays > 0 {
+		task.EstimatedDays = req.EstimatedDays
+	}
+	if req.EstimatedCost > 0 {
+		task.EstimatedCost = req.EstimatedCost
+	}
+	if req.ExpenseType != "" {
+		task.ExpenseType = req.ExpenseType
 	}
 	task.UpdatedAt = time.Now()
 	if err := s.Svc.DB.Save(&task).Error; err != nil {

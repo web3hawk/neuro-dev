@@ -12,10 +12,10 @@ import ProjectList from './components/ProjectList.tsx';
 import ProjectDetail from './components/ProjectDetail.tsx';
 import ProjectLogs from './components/ProjectLogs.tsx';
 import Settings from './components/Settings.tsx';
-import TaskExecutionList from './components/TaskExecutionList.tsx';
+import TaskCostList from './components/TaskCostList.tsx';
 import ProjectCreate from './components/ProjectCreate.tsx';
 import ProjectEdit from './components/ProjectEdit.tsx';
-import TaskCreate from './components/TaskCreate.tsx';
+import TaskCostCreate from './components/TaskCostCreate.tsx';
 import './App.css';
 
 const { useState, useEffect } = React;
@@ -130,8 +130,8 @@ function AppLayout() {
               <Route path="/" element={<Navigate to="/projects" replace />} />
               <Route path="/projects" element={<ProjectList />} />
               <Route path="/create" element={<ProjectCreate />} />
-              <Route path="/tasks" element={<TaskExecutionList />} />
-              <Route path="/tasks/create" element={<TaskCreate />} />
+              <Route path="/tasks" element={<TaskCostList />} />
+              <Route path="/tasks/create" element={<TaskCostCreate />} />
               <Route path="/project/:id/edit" element={<ProjectEdit />} />
               <Route path="/project/:id" element={<ProjectDetail />} />
               <Route path="/project/:id/logs" element={<ProjectLogs />} />

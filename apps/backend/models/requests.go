@@ -10,10 +10,13 @@ type CreateProjectRequest struct {
 }
 
 type CreateTaskRequest struct {
-	ProjectID    string `json:"project_id"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	Type         string `json:"type"`
-	Priority     int    `json:"priority"`
-	Requirements string `json:"requirements"`
+	ProjectID     string  `json:"project_id"`
+	Name          string  `json:"name"`
+	Description   string  `json:"description"`
+	Type          string  `json:"type"`
+	Priority      int     `json:"priority"`
+	Requirements  string  `json:"requirements"`
+	EstimatedDays int     `json:"estimated_days"`
+	EstimatedCost float64 `json:"estimated_cost"`
+	ExpenseType   string  `json:"expense_type"`
 }

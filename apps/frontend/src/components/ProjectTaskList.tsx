@@ -190,7 +190,12 @@ function ProjectTaskList({ projectId, onTaskUpdate }: TaskListProps) {
       if (editingTask) {
         response = await api.put(`/api/tasks/${editingTask.id}`, taskData);
       } else {
-        response = await api.post(`/api/projects/${projectId}/tasks`, taskData);
+        // 在项目详情中创建的任务默认为预算类型
+        const taskDataWithType = {
+          ...taskData,
+          expense_type: 'budget'
+        };
+        response = await api.post(`/api/projects/${projectId}/tasks`, taskDataWithType);
       }
       
       if (response.data?.success) {

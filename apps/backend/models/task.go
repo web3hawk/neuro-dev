@@ -17,6 +17,7 @@ type Task struct {
 	Language      string      `json:"language"`
 	EstimatedDays int         `json:"estimated_days"`
 	EstimatedCost float64     `json:"estimated_cost"`
+	ExpenseType   string      `json:"expense_type" gorm:"default:'budget'"` // budget: 预算, cost: 成本
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     time.Time   `json:"updated_at"`
 	Results       TaskResults `json:"results" gorm:"embedded;embeddedPrefix:results_"`
