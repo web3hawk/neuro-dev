@@ -13,7 +13,7 @@ import (
 func (s *Service) GenerateTasksFromDescription(description string, model string, vendors string) []models.Task {
 	prompt := fmt.Sprintf(`作为一个资深的软件架构师，请参考以下云厂商的功能：
 云厂商：%s
-将以下项目描述分解成具体的开发任务。每个任务应该包含：任务名称、详细描述、类型（前端web研发/后端服务研发/测试/运维）、优先级（1-3）、具体要求、预计研发天数、预计研发费用。
+将以下项目描述分解成具体的开发任务。每个任务应该包含：任务名称、详细描述、类型（前端web研发/后端服务研发/测试/运维/运营）、优先级（1-3）、具体要求、预计研发天数、预计研发费用。
 项目描述：%s
 
 请以JSON格式返回任务列表，格式如下：
