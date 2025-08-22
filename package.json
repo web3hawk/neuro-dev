@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "ai战队",
   "scripts": {
-    "start": "cd apps/frontend && craco start",
-    "build": "cd apps/frontend && craco build",
-    "test": "cd apps/frontend && craco test",
-    "dev": "cd apps/frontend && craco start",
     "frontend:start": "cd apps/frontend && craco start",
     "frontend:build": "cd apps/frontend && craco build",
     "frontend:test": "cd apps/frontend && craco test",

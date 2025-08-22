@@ -34,7 +34,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import moment from 'moment';
 import api from '../utils/apiClient';
-import TaskList from './TaskList';
+import ProjectTaskList from './ProjectTaskList';
 const { useState, useEffect, useRef } = React;
 
 const { Title, Text, Paragraph } = Typography;
@@ -331,8 +331,8 @@ function ProjectDetail() {
       <Card>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="任务管理1" key="tasks">
-            <TaskList 
-              projectId={id as any} 
+            <ProjectTaskList
+              projectId={id as any}
               onTaskUpdate={handleTaskUpdate}
             />
           </TabPane>
