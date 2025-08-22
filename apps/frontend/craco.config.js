@@ -12,8 +12,11 @@
 module.exports = {
   webpack: {
     configure: (webpackConfig) => {
-      // 1) Use in-memory cache for Webpack to avoid filesystem writes while keeping fast rebuilds
-      webpackConfig.cache = { type: 'memory' };
+      // 1) Use filesystem cache in node_modules directory instead of memory cache
+      webpackConfig.cache = { 
+        type: 'filesystem',
+        cacheDirectory: require('path').resolve(__dirname, '../../node_modules/.cache/webpack')
+      };
       
       const rules = webpackConfig?.module?.rules || [];
 
@@ -59,7 +62,7 @@ module.exports = {
             plugin.options.typescript.configOverwrite.compilerOptions = {
               ...(plugin.options.typescript.configOverwrite.compilerOptions || {}),
               incremental: true,
-              tsBuildInfoFile: require('path').resolve(__dirname, '../../lib/tsbuildinfo/build.tsbuildinfo'),
+              tsBuildInfoFile: require('path').resolve(__dirname, '../../node_modules/tsbuildinfo/build.tsbuildinfo'),
             };
           }
         });

@@ -31,25 +31,25 @@ function AppLayout() {
     {
       key: 'projects',
       icon: <ProjectOutlined />,
-      label: '项目',
+      label: '项目预算',
       path: '/projects'
     },
     {
       key: 'tasks',
       icon: <UnorderedListOutlined />,
-      label: '成本',
+      label: '成本追踪',
       path: '/tasks'
     },
     {
       key: 'history',
       icon: <HistoryOutlined />,
-      label: '账单',
+      label: '账单核对',
       path: '/history'
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: '设置',
+      label: '系统设置',
       path: '/settings'
     }
   ];

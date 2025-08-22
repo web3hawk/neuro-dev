@@ -330,7 +330,7 @@ function ProjectDetail() {
       {/* Task Management */}
       <Card>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="任务管理" key="tasks">
+          <TabPane tab="任务管理1" key="tasks">
             <TaskList 
               projectId={id as any} 
               onTaskUpdate={handleTaskUpdate}

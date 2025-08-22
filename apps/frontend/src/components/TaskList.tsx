@@ -66,6 +66,8 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [taskFormVisible, setTaskFormVisible] = useState<boolean>(false);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
+  const [taskDetailVisible, setTaskDetailVisible] = useState<boolean>(false);
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [stats, setStats] = useState<TaskStats>({
     total: 0,
     completed: 0,
@@ -151,6 +153,11 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
     setTaskFormVisible(true);
   };
 
+  const handleTaskDetail = (task: TaskItem) => {
+    setSelectedTask(task);
+    setTaskDetailVisible(true);
+  };
+
   const handleStartTask = async (taskId: string | number) => {
     try {
       const response = await api.post(`/api/tasks/${taskId}/start`);
@@ -227,12 +234,22 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
 
   const columns = [
     {
-      title: '任务名称',
+      title: '任务名称1',
       dataIndex: 'name',
       key: 'name',
       render: (text: string, record: TaskItem) => (
         <div>
-          <div style={{ fontWeight: 'bold' }}>{text}</div>
+          <div 
+            style={{ 
+              fontWeight: 'bold', 
+              cursor: 'pointer', 
+              color: '#1890ff',
+              textDecoration: 'underline'
+            }}
+            onClick={() => handleTaskDetail(record)}
+          >
+            {text}
+          </div>
           <div style={{ color: '#666', fontSize: '12px' }}>
             {record.description?.substring(0, 50)}...
           </div>
@@ -281,7 +298,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
       render: (days: number) => days ? <Tag color="cyan">{days}天</Tag> : <Tag color="default">未设置</Tag>
     },
     {
-      title: '预计成本',
+      title: '预计成本1',
       dataIndex: 'estimated_cost',
       key: 'estimated_cost',
       render: (cost: number) => cost ? <Tag color="green">¥{cost.toLocaleString()}</Tag> : <Tag color="default">未设置</Tag>
@@ -312,7 +329,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
             icon={<EditOutlined />}
             onClick={() => handleEditTask(record)}
           >
-            编辑
+            编辑1
           </Button>
           <Popconfirm
             title="确定要删除这个任务吗？"
@@ -325,7 +342,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
               danger
               icon={<DeleteOutlined />}
             >
-              删除
+              删除1
             </Button>
           </Popconfirm>
         </Space>
@@ -342,7 +359,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
       {/* Statistics */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={6}>
-          <Statistic title="总任务数" value={stats.total} />
+          <Statistic title="总任务数1" value={stats.total} />
         </Col>
         <Col span={6}>
           <Statistic 
@@ -369,7 +386,7 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
 
       {/* Task List */}
       <Card 
-        title="项目任务"
+        title="项目任务-临时修改"
         extra={
           <Button 
             type="primary" 
@@ -423,6 +440,116 @@ function TaskList({ projectId, onTaskUpdate }: TaskListProps) {
             setEditingTask(null);
           }}
         />
+      </Modal>
+
+      {/* Task Detail Modal */}
+      <Modal
+        title="任务详情"
+        open={taskDetailVisible}
+        onCancel={() => {
+          setTaskDetailVisible(false);
+          setSelectedTask(null);
+        }}
+        footer={[
+          <Button key="close" onClick={() => {
+            setTaskDetailVisible(false);
+            setSelectedTask(null);
+          }}>
+            关闭
+          </Button>,
+          selectedTask?.status === 'pending' && (
+            <Button 
+              key="execute" 
+              type="primary" 
+              icon={<PlayCircleOutlined />}
+              onClick={() => {
+                if (selectedTask) {
+                  handleStartTask(selectedTask.id);
+                  setTaskDetailVisible(false);
+                  setSelectedTask(null);
+                }
+              }}
+            >
+              执行
+            </Button>
+          )
+        ]}
+        width={700}
+      >
+        {selectedTask && (
+          <div>
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Title level={4}>{selectedTask.name}</Title>
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>任务类型：</Text>
+                <br />
+                <Tag>{selectedTask.type || '功能'}</Tag>
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>任务状态：</Text>
+                <br />
+                {getStatusTag(selectedTask.status)}
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>优先级：</Text>
+                <br />
+                {getPriorityTag(selectedTask.priority)}
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>进度：</Text>
+                <br />
+                <Progress 
+                  percent={selectedTask.progress || 0} 
+                  size="small"
+                  status={selectedTask.status === 'failed' ? 'exception' : 'normal'}
+                />
+                {selectedTask.current_phase && (
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                    当前阶段：{selectedTask.current_phase}
+                  </div>
+                )}
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>预计天数：</Text>
+                <br />
+                <Text>{selectedTask.estimated_days ? `${selectedTask.estimated_days}天` : '未设置'}</Text>
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>预计成本：</Text>
+                <br />
+                <Text>{selectedTask.estimated_cost ? `¥${selectedTask.estimated_cost.toLocaleString()}` : '未设置'}</Text>
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>创建时间：</Text>
+                <br />
+                <Text>{selectedTask.created_at ? moment(selectedTask.created_at).format('YYYY-MM-DD HH:mm:ss') : '未知'}</Text>
+              </Col>
+              
+              <Col span={12}>
+                <Text strong>最后更新：</Text>
+                <br />
+                <Text>{selectedTask.updated_at ? moment(selectedTask.updated_at).format('YYYY-MM-DD HH:mm:ss') : '未知'}</Text>
+              </Col>
+              
+              {selectedTask.description && (
+                <Col span={24}>
+                  <Text strong>任务描述：</Text>
+                  <br />
+                  <Text style={{ whiteSpace: 'pre-wrap' }}>{selectedTask.description}</Text>
+                </Col>
+              )}
+            </Row>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -6,12 +6,19 @@
     "./apps/frontend"
   ],
   "scripts": {
-    "neuro-install": "npm install --workspace ./apps/frontend",
     "neuro-fe": "npm run start --workspace ./apps/frontend",
-    "neuro-build": "npm run build --workspace ./apps/frontend",
+    "neuro-clean-install": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json & npm install & cd apps\\frontend & npm install --no-package-lock",
+    "neuro-install": "npm ci",
     "neuro-clean": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json",
-    "neuro-clean:all": "rmdir /s /q node_modules & if exist package-lock.json del /f /q package-lock.json & npm install --workspaces"
+    "neuro-build": "npm run build --workspace ./apps/frontend"
   },
   "author": "kevin",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "chatdev-frontend": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "typescript": "^5.6.2"
+  }
 }
