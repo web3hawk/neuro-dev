@@ -64,6 +64,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://172.19.206.103:8080"
+  }
 }

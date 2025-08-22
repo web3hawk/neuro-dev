@@ -61,6 +61,7 @@ function ProjectList({ showHistory = false }: { showHistory?: boolean }) {
     try {
       setLoading(true);
       const res = await api.get('/api/projects');
+      debugger
       if ((res as any).ok && (res as any).data?.success) {
         const list = (res as any).data.data as ProjectItem[];
         // Ensure progress is present; if not, compute from tasks

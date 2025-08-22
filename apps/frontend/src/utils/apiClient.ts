@@ -175,6 +175,6 @@ export class ApiClient {
   }
 }
 
-// Default client instance. With CRA proxy in package.json, relative /api works.
-const api = new ApiClient();
+// Default client instance. Configure to use localhost:8080 backend service.
+const api = new ApiClient({ baseURL: 'http://localhost:8080' });
 export default api;

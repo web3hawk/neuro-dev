@@ -18,6 +18,9 @@ module.exports = {
         cacheDirectory: require('path').resolve(__dirname, '../../node_modules/.cache/webpack')
       };
       
+      // 2) Fix source map parsing issues with antd and other libraries
+      webpackConfig.devtool = process.env.NODE_ENV === 'production' ? false : 'eval-source-map';
+      
       const rules = webpackConfig?.module?.rules || [];
 
       const visitRule = (rule) => {
