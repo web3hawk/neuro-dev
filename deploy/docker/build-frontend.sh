@@ -44,7 +44,7 @@ if [ ! -f "$DOCKERFILE" ]; then
 fi
 
 # Check if package.json exists
-if [ ! -f "apps/frontend/package.json" ]; then
+if [ ! -f "package.json" ]; then
     print_error "Frontend package.json not found"
     exit 1
 fi
