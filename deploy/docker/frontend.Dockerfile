@@ -11,7 +11,9 @@ COPY package*.json ./
 COPY apps/frontend/ ./apps/frontend/
 
 # Install all dependencies
-RUN npm install
+
+RUN npm run install:all
+
 
 # Expose React development server port
 EXPOSE 3001
