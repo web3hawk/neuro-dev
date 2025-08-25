@@ -11,7 +11,8 @@ COPY apps/frontend/package*.json ./
 RUN npm ci --only=production
 
 # Copy source code
-COPY apps/frontend/ .
+COPY package.json .
+COPY apps/frontend/ apps/frontend/
 
 # Build the application
 RUN npm run build
