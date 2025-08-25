@@ -1,5 +1,5 @@
 # Frontend Dockerfile for neuro-dev React application - Development Mode
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -9,9 +9,6 @@ COPY package.json ./
 
 # Copy frontend application
 COPY apps/frontend/ ./apps/frontend/
-
-RUN npm ci --only=production
-
 
 # Install all dependencies
 RUN npm run install:all
