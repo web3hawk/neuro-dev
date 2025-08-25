@@ -4,6 +4,9 @@
 
 set -e
 
+cd ../../
+
+
 # Configuration
 IMAGE_NAME="neuro-dev/frontend"
 TAG="${1:-latest}"
