@@ -15,6 +15,7 @@ COPY package.json .
 COPY apps/frontend/ apps/frontend/
 
 # Build the application
+RUN npm run install:all
 RUN npm run frontend:build
 
 # Production stage with Nginx
