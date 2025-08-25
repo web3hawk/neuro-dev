@@ -1,0 +1,17 @@
+apiVersion: v2
+name: neuro-dev
+description: A Helm chart for neuro-dev application with frontend and backend services
+type: application
+version: 0.1.0
+appVersion: "1.0"
+keywords:
+  - neuro-dev
+  - ai
+  - task-management
+  - fullstack
+home: https://github.com/your-org/neuro-dev
+sources:
+  - https://github.com/your-org/neuro-dev
+maintainers:
+  - name: Development Team
+    email: dev@yourcompany.com
