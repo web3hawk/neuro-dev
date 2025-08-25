@@ -5,15 +5,16 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy root package.json (contains all dependencies)
-COPY package*.json ./
+COPY package.json ./
 
 # Copy frontend application
 COPY apps/frontend/ ./apps/frontend/
 
+RUN npm ci --only=production
+
+
 # Install all dependencies
-
 RUN npm run install:all
-
 
 # Expose React development server port
 EXPOSE 3001
