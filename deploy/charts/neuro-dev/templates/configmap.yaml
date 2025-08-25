@@ -1,0 +1,41 @@
+{{- if .Values.config.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.backend.name }}-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.backend.name }}
+    component: backend
+data:
+  {{- range $key, $value := .Values.config.data }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  # Default configuration
+  app.properties: |
+    server.port={{ .Values.backend.service.targetPort }}
+    app.name=neuro-dev-backend
+    app.version={{ .Chart.AppVersion }}
+---
+{{- if .Values.config.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.frontend.name }}-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.frontend.name }}
+    component: frontend
+data:
+  {{- range $key, $value := .Values.config.data }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  # Default frontend configuration
+  config.json: |
+    {
+      "apiUrl": "{{ range .Values.frontend.env }}{{ if eq .name "REACT_APP_API_URL" }}{{ .value }}{{ end }}{{ end }}",
+      "appName": "neuro-dev-frontend",
+      "version": "{{ .Chart.AppVersion }}"
+    }
+{{- end }}
+{{- end }}

@@ -1,0 +1,271 @@
+{
+  "chain_config": {
+    "name": "ChatDev Multi-Agent Chain",
+    "description": "ChatDev is a software company powered by multiple intelligent agents, such as chief executive officer, chief human resources officer, chief product officer, chief technology officer, etc, with a multi-agent organizational structure and the mission of 'changing the digital world through programming'.",
+    "chain_type": "sequential",
+    "phases": [
+      {
+        "phase": "DemandAnalysis",
+        "phase_type": "SimplePhase",
+        "max_turn_step": -1,
+        "need_reflect": true,
+        "assistant_role_name": "首席产品官",
+        "user_role_name": "首席执行官",
+        "phase_prompt": [
+          "ChatDev已经举行了头脑风暴会议，确定一个新的软件。",
+          "现在，我们需要分析用户的需求和想法，并修改产品想法。",
+          "在分析过程中，我们需要确定产品的基本功能。",
+          "请注意，我们需要制定一个适合产品功能的想法。",
+          "用户的原始需求是：\"{task}\"。",
+          "用户给出的产品形态是：\"{modality}\"。",
+          "总结用户的需求，列出产品的完整细节功能，并给出开发思路和想法。"
+        ]
+      },
+      {
+        "phase": "LanguageChoose",
+        "phase_type": "SimplePhase",
+        "max_turn_step": -1,
+        "need_reflect": true,
+        "assistant_role_name": "首席技术官",
+        "user_role_name": "首席执行官",
+        "phase_prompt": [
+          "根据新用户的任务和我们设计的产品形态，我们的讨论结果列在下面：",
+          "任务：\"{task}\"。",
+          "形态：\"{modality}\"。",
+          "想法：\"{ideas}\"",
+          "我们已经决定完成这个任务，通过一个可执行的软件实现，想法应该很好地合并到这个软件的功能中。",
+          "作为{assistant_role}，要了解用户需求，您应该选择一种编程语言以确保所有需求都得到良好实现。请注意，我们必须仅使用一种编程语言ONLY并且它必须是我们选择的任何一种编程语言，即C++，Java，Python，HTML，CSS，JavaScript，SQL，C#，PHP，TypeScript，C，C，Swift，R，Go，Kotlin等",
+          "如果我们需要一些数据，您可以使用生成的随机数据，用户输入，文件读取，网络抓取，数据库或API，等等，无论原始用户任务是什么。",
+          "请提供选择该编程语言的理由以及如何实现该任务。"
+        ]
+      },
+      {
+        "phase": "Coding",
+        "phase_type": "SimplePhase",
+        "max_turn_step": 1,
+        "need_reflect": false,
+        "assistant_role_name": "程序员",
+        "user_role_name": "首席技术官",
+        "phase_prompt": [
+          "根据新用户的任务和我们设计的产品形态、语言和想法，我们的讨论结果列在下面：",
+          "任务：\"{task}\"。",
+          "形态：\"{modality}\"。",
+          "编程语言：\"{language}\"",
+          "想法：\"{ideas}\"",
+          "我们已经决定完成这个任务，通过一个可执行的软件实现，想法应该很好地合并到这个软件的功能中。",
+          "作为{assistant_role}，要满足新用户的需求并使软件富有创意、可执行和稳健，您应该使用以下格式编写一个或多个文件：",
+          "```python",
+          "# filename: main.py",
+          "# This is the main file of the software",
+          "...",
+          "```",
+          "请注意，您编写的代码应该是完整的，详细的，可执行的，准确的，创新的和安全的。",
+          "严格按照要求的格式返回所有代码，不能有遗漏。"
+        ]
+      },
+      {
+        "phase": "CodeCompleteAll",
+        "phase_type": "ComposedPhase",
+        "cycle_num": 10,
+        "composition": [
+          {
+            "phase": "CodeComplete",
+            "phase_type": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": false,
+            "assistant_role_name": "程序员",
+            "user_role_name": "首席技术官",
+            "phase_prompt": [
+              "根据新用户的任务、我们设计的产品形态、语言和想法，我们开发的代码列在下面：",
+              "任务：\"{task}\"。",
+              "形态：\"{modality}\"。",
+              "编程语言：\"{language}\"",
+              "想法：\"{ideas}\"",
+              "代码：",
+              "\"{codes}\"",
+              "作为{assistant_role}，要满足新用户的需求并使软件富有创意、可执行和稳健，您应该实现所有方法。现在，实现所有未完成的方法。如果没有方法需要实现，请仅返回一行，如\"<INFO> Finished\"。"
+            ]
+          }
+        ]
+      },
+      {
+        "phase": "CodeReview",
+        "phase_type": "ComposedPhase",
+        "cycle_num": 3,
+        "composition": [
+          {
+            "phase": "CodeReviewComment",
+            "phase_type": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": false,
+            "assistant_role_name": "代码审查员",
+            "user_role_name": "首席技术官",
+            "phase_prompt": [
+              "根据新用户的任务、我们设计的产品形态、语言和想法，我们开发的代码列在下面：",
+              "任务：\"{task}\"。",
+              "形态：\"{modality}\"。",
+              "编程语言：\"{language}\"",
+              "想法：\"{ideas}\"",
+              "代码：",
+              "\"{codes}\"",
+              "作为{assistant_role}，要确保软件的正确性，您应该查看上述代码并提供修正意见。现在，请审查代码并指出可能的错误（如果有）。"
+            ]
+          },
+          {
+            "phase": "CodeReviewModification",
+            "phase_type": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": false,
+            "assistant_role_name": "程序员",
+            "user_role_name": "代码审查员",
+            "phase_prompt": [
+              "根据新用户的任务、我们设计的产品形态、语言和想法，我们开发的第一版源代码列在下面：",
+              "任务：\"{task}\"。",
+              "形态：\"{modality}\"。",
+              "编程语言：\"{language}\"",
+              "想法：\"{ideas}\"",
+              "代码：",
+              "\"{codes}\"",
+              "代码评论：",
+              "\"{comments}\"",
+              "在软件中，每个文件必须严格遵循markdown代码块格式，其中以下标记必须被替换，使得\"FILENAME\"是包含文件扩展名的小写文件名，\"LANGUAGE\"是编程语言，\"DOCSTRING\"是源代码中用于记录特定代码段的字符串字面量，\"CODE\"是原始代码。格式：",
+              "FILENAME",
+              "```LANGUAGE",
+              "'''",
+              "DOCSTRING",
+              "'''",
+              "CODE",
+              "```",
+              "作为{assistant_role}，为了满足新用户的需求并使软件富有创意、可执行和稳健，您应该根据评论修改相应的代码。然后，根据评论输出修复了所有错误的完整代码。严格按照要求的格式返回所有代码。"
+            ]
+          }
+        ]
+      },
+      {
+        "phase": "Test",
+        "phase_type": "ComposedPhase",
+        "cycle_num": 3,
+        "composition": [
+          {
+            "phase": "TestErrorSummary",
+            "phase_type": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": false,
+            "assistant_role_name": "程序员",
+            "user_role_name": "软件测试工程师",
+            "phase_prompt": [
+              "我们开发的源代码和相应的测试报告列在下面：",
+              "编程语言：\"{language}\"",
+              "源代码：",
+              "\"{codes}\"",
+              "源代码测试报告：",
+              "\"{test_reports}\"",
+              "根据我的测试报告，请定位并总结导致问题的错误。"
+            ]
+          },
+          {
+            "phase": "TestModification",
+            "phase_type": "SimplePhase",
+            "max_turn_step": 1,
+            "need_reflect": false,
+            "assistant_role_name": "程序员",
+            "user_role_name": "软件测试工程师",
+            "phase_prompt": [
+              "我们开发的源代码和相应的测试报告列在下面：",
+              "编程语言：\"{language}\"",
+              "源代码：",
+              "\"{codes}\"",
+              "源代码测试报告：",
+              "\"{test_reports}\"",
+              "测试报告错误摘要：",
+              "\"{error_summary}\"",
+              "请注意，每个文件必须严格遵循markdown代码块格式，其中以下标记必须被替换，使得\"FILENAME\"是包含文件扩展名的小写文件名，\"LANGUAGE\"是编程语言，\"DOCSTRING\"是源代码中用于记录特定代码段的字符串字面量，\"CODE\"是原始代码：",
+              "FILENAME",
+              "```LANGUAGE",
+              "'''",
+              "DOCSTRING",
+              "'''",
+              "CODE",
+              "```",
+              "作为{assistant_role}，为了满足新用户的需求并使软件运行流畅和稳健，您应该根据错误摘要修改代码。现在，使用上面示例的格式，根据错误摘要修改有问题的代码。输出您根据测试报告修复的代码和相应的解释（严格遵循上面定义的格式，包括FILENAME、LANGUAGE、DOCSTRING和CODE；严格禁止不完整的\"TODO\"代码）。如果没有报告错误，请仅返回一行，如\"<INFO> Finished\"。"
+            ]
+          }
+        ]
+      },
+      {
+        "phase": "EnvironmentDoc",
+        "phase_type": "SimplePhase",
+        "max_turn_step": 1,
+        "need_reflect": true,
+        "assistant_role_name": "程序员",
+        "user_role_name": "首席技术官",
+        "phase_prompt": [
+          "新用户的任务和我们开发的代码列出如下：",
+          "任务：\"{task}\"。",
+          "形态：\"{modality}\"。",
+          "编程语言：\"{language}\"",
+          "想法：\"{ideas}\"",
+          "代码：",
+          "\"{codes}\"",
+          "作为{assistant_role}，您应该编写一个requirements.txt文件，这在Python项目中通常用于指定项目正常运行所需的依赖项或包。它作为一种以标准化格式记录和管理项目依赖关系的方式。例如：",
+          "requirements.txt",
+          "```",
+          "numpy==1.19.2",
+          "pandas>=1.1.4",
+          "```",
+          "根据上面提供的代码和示例格式，生成一个合适的requirements.txt文件，确保所有代码都能正确运行，并且依赖项能够兼容。"
+        ]
+      },
+      {
+        "phase": "Manual",
+        "phase_type": "SimplePhase",
+        "max_turn_step": 1,
+        "need_reflect": false,
+        "assistant_role_name": "首席产品官",
+        "user_role_name": "首席执行官",
+        "phase_prompt": [
+          "新用户的任务和我们开发的代码列出如下：",
+          "任务：\"{task}\"。",
+          "形态：\"{modality}\"。",
+          "编程语言：\"{language}\"",
+          "想法：\"{ideas}\"",
+          "代码：",
+          "\"{codes}\"",
+          "作为{assistant_role}，您应该编写一个用户手册，用于描述如何使用此软件，包括介绍主要功能以及如何运行它。",
+          "请写一个适合用户使用的手册文件，以便他们能够理解并使用软件。"
+        ]
+      }
+    ],
+    "roles": [
+      "Chief Executive Officer",
+      "Counselor",
+      "Chief Human Resource Officer",
+      "Chief Product Officer",
+      "Chief Technology Officer",
+      "Programmer",
+      "Code Reviewer",
+      "Software Test Engineer",
+      "Chief Creative Officer"
+    ],
+    "settings": {
+      "clear_structure": true,
+      "gui_design": true,
+      "git_management": false,
+      "web_spider": false,
+      "self_improve": false,
+      "incremental_develop": false,
+      "with_memory": false
+    }
+  },
+  "langchain_config": {
+    "llm_config": {
+      "model_name": "gpt-3.5-turbo",
+      "temperature": 0.7,
+      "max_tokens": 2048
+    },
+    "chain_config": {
+      "memory_type": "buffer",
+      "verbose": true
+    }
+  }
+}
